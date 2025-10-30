@@ -48,75 +48,9 @@ Store Terraform state remotely using S3 (for remote state) + DynamoDB (for locki
 
 ### Create IAM tf-bootstrap User
 
-- Create IAM user `tf-bootstrap`
-- Assign `TfBootstrapS3Dynamo` policy granting S3 & DynamoDB access:
-
-```json
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "S3BucketAdminForState",
-            "Effect": "Allow",
-            "Action": [
-                "s3:CreateBucket",
-                "s3:DeleteBucket",
-                "s3:GetAccelerateConfiguration",
-                "s3:GetBucketAcl",
-                "s3:GetBucketCORS",
-                "s3:GetBucketLocation",
-                "s3:GetBucketLogging",
-                "s3:GetBucketObjectLockConfiguration",
-                "s3:GetBucketPolicy",
-                "s3:GetBucketPublicAccessBlock",
-                "s3:GetBucketRequestPayment",
-                "s3:GetBucketTagging",
-                "s3:GetBucketVersioning",
-                "s3:GetBucketWebsite",
-                "s3:GetEncryptionConfiguration",
-                "s3:GetLifecycleConfiguration",
-                "s3:GetReplicationConfiguration",
-                "s3:ListBucket",
-                "s3:PutBucketPolicy",
-                "s3:PutBucketPublicAccessBlock",
-                "s3:PutBucketTagging",
-                "s3:PutBucketVersioning",
-                "s3:PutEncryptionConfiguration"
-            ],
-            "Resource": "*"
-        },
-        {
-            "Sid": "S3ObjectRWForState",
-            "Effect": "Allow",
-            "Action": [
-                "s3:GetObject",
-                "s3:PutObject",
-                "s3:DeleteObject"
-            ],
-            "Resource": "*"
-        },
-        {
-            "Sid": "DynamoForLocks",
-            "Effect": "Allow",
-            "Action": [
-                "dynamodb:CreateTable",
-                "dynamodb:UpdateTable",
-                "dynamodb:DeleteTable",
-                "dynamodb:DescribeContinuousBackups",
-                "dynamodb:DescribeTable",
-                "dynamodb:DescribeTimeToLive",
-                "dynamodb:GetItem",
-                "dynamodb:PutItem",
-                "dynamodb:DeleteItem",
-                "dynamodb:UpdateItem",
-                "dynamodb:TagResource",
-                "dynamodb:ListTagsOfResource"
-            ],
-            "Resource": "*"
-        }
-    ]
-}
-```
+- Create an IAM User: `tf-bootstrap`
+- Create an IAM Policy: `TfBootstrapS3Dynamo`
+  - Grant S3 & DynamoDB access using the policy contained in `infra/bootstrap/tf-bootstrap-iam-policy.json`
 
 ### Configure AWS Credentials
 
