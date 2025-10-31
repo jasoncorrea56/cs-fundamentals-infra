@@ -70,7 +70,7 @@ module "externaldns_chart" {
 module "db_secret" {
   source = "../../modules/asm_secret"
   name   = "csf/db-url"
-  db_url = "postgresql://user:pass@host:5432/dbname" # Not a real secret, just for demo purposes
+  db_url = var.db_url
 }
 
 module "irsa_db" {
