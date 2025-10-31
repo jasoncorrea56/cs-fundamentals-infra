@@ -51,3 +51,13 @@ module "externaldns_irsa" {
   cluster_name      = module.eks.cluster_name
   oidc_provider_arn = module.irsa.oidc_provider_arn
 }
+
+module "externaldns_chart" {
+  source        = "../../modules/externaldns_chart"
+  cluster_name  = module.eks.cluster_name
+  role_arn      = module.externaldns_irsa.role_arn
+  owner_id      = module.eks.cluster_name
+  # Optional: Narrow scope
+  # domain_filters = ["domain.com"]
+  # zone_id_filters = ["Z123ABCDEF..."]
+}
