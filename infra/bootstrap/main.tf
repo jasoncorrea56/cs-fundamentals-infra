@@ -13,7 +13,7 @@ provider "aws" {
 }
 
 locals {
-  # Example: acme-csfundamentals-tfstate-prod-us-west-2
+  # Example: jasoncorrea56-csfundamentals-tfstate-prod-us-west-2
   bucket_name = "${var.org}-${var.project}-tfstate-${var.env}-${var.region}"
 }
 

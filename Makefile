@@ -2,7 +2,7 @@
 bootstrap:
 	@cd infra/bootstrap && terraform init && \
 		terraform apply -auto-approve \
-			-var org=acme -var project=csfundamentals -var env=prod -var region=us-west-2
+			-var org=jasoncorrea56 -var project=csfundamentals -var env=prod -var region=us-west-2
 
 .PHONY: state-init
 state-init:

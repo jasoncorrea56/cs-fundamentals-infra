@@ -24,3 +24,10 @@ module "irsa" {
   source       = "../../modules/irsa"
   cluster_name = module.eks.cluster_name
 }
+
+module "alb_irsa" {
+  source            = "../../modules/alb_irsa"
+  cluster_name      = module.eks.cluster_name
+  oidc_provider_arn = module.irsa.oidc_provider_arn
+  role_name         = "csf-alb-controller-role"
+}
