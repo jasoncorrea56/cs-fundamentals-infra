@@ -45,3 +45,9 @@ module "alb_controller_chart" {
   vpc_id       = module.vpc.vpc_id
   role_arn     = module.alb_irsa.role_arn
 }
+
+module "externaldns_irsa" {
+  source            = "../../modules/externaldns_irsa"
+  cluster_name      = module.eks.cluster_name
+  oidc_provider_arn = module.irsa.oidc_provider_arn
+}
