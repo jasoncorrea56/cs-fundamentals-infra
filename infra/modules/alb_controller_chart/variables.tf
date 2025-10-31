@@ -1,6 +1,8 @@
 variable "cluster_name" { type = string }
-variable "oidc_provider_arn" { type = string }
-variable "sa_namespace" {
+variable "region" { type = string }
+variable "vpc_id" { type = string }
+variable "role_arn" { type = string }
+variable "namespace" {
   type    = string
   default = "kube-system"
 }
@@ -8,7 +10,7 @@ variable "sa_name" {
   type    = string
   default = "aws-load-balancer-controller"
 }
-variable "role_name" {
+variable "chart_version" {
   type    = string
-  default = "csf-alb-controller-role"
+  default = "1.9.1"
 }

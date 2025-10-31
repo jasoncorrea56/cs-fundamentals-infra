@@ -31,3 +31,17 @@ module "alb_irsa" {
   oidc_provider_arn = module.irsa.oidc_provider_arn
   role_name         = "csf-alb-controller-role"
 }
+
+module "alb_controller_policy" {
+  source      = "../../modules/alb_controller_policy"
+  policy_name = "AWSLoadBalancerControllerIAMPolicy-Custom"
+  role_name   = "csf-alb-controller-role"
+}
+
+module "alb_controller_chart" {
+  source       = "../../modules/alb_controller_chart"
+  cluster_name = module.eks.cluster_name
+  region       = "us-west-2"
+  vpc_id       = module.vpc.vpc_id
+  role_arn     = module.alb_irsa.role_arn
+}

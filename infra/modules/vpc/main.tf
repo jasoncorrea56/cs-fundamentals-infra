@@ -4,14 +4,14 @@ resource "aws_vpc" "this" {
   enable_dns_support   = true
 
   tags = {
-    Name = "${var.name}-vpc"
+    Name                                        = "${var.name}-vpc"
     "kubernetes.io/cluster/${var.cluster_name}" = "shared"
   }
 }
 
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.this.id
-  tags   = {
+  tags = {
     Name = "${var.name}-igw"
   }
 }
@@ -34,7 +34,7 @@ resource "aws_nat_gateway" "nat" {
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.this.id
   route {
-    cidr_block = "0.0.0.0/0" 
+    cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
   }
   tags = {
@@ -52,7 +52,7 @@ resource "aws_route_table_association" "public" {
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.this.id
   route {
-    cidr_block = "0.0.0.0/0"
+    cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.nat.id
   }
   tags = {
@@ -67,28 +67,28 @@ resource "aws_route_table_association" "private" {
 }
 
 resource "aws_subnet" "public" {
-  for_each = { for i, az in var.azs : az => cidrsubnet(var.cidr_block, 8, i) }
+  for_each                = { for i, az in var.azs : az => cidrsubnet(var.cidr_block, 8, i) }
   vpc_id                  = aws_vpc.this.id
   cidr_block              = each.value
   availability_zone       = each.key
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "${var.name}-public-${each.key}"
-    "kubernetes.io/role/elb" = "1"
+    Name                                        = "${var.name}-public-${each.key}"
+    "kubernetes.io/role/elb"                    = "1"
     "kubernetes.io/cluster/${var.cluster_name}" = "shared"
   }
 }
 
 resource "aws_subnet" "private" {
-  for_each = { for i, az in var.azs : az => cidrsubnet(var.cidr_block, 8, i + length(var.azs)) }
+  for_each          = { for i, az in var.azs : az => cidrsubnet(var.cidr_block, 8, i + length(var.azs)) }
   vpc_id            = aws_vpc.this.id
   cidr_block        = each.value
   availability_zone = each.key
 
   tags = {
-    Name = "${var.name}-private-${each.key}"
-    "kubernetes.io/role/internal-elb" = "1"
+    Name                                        = "${var.name}-private-${each.key}"
+    "kubernetes.io/role/internal-elb"           = "1"
     "kubernetes.io/cluster/${var.cluster_name}" = "shared"
   }
 }

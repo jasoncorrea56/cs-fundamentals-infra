@@ -8,7 +8,7 @@ resource "aws_eks_cluster" "this" {
   }
 
   enabled_cluster_log_types = ["api", "audit", "authenticator"]
-  tags = { Name = var.cluster_name }
+  tags                      = { Name = var.cluster_name }
 }
 
 resource "aws_eks_node_group" "default" {
@@ -23,7 +23,7 @@ resource "aws_eks_node_group" "default" {
     min_size     = 1
   }
 
-  ami_type  = "AL2_x86_64"
+  ami_type       = "AL2_x86_64"
   instance_types = ["t3.medium"]
 
   tags = { Name = "${var.cluster_name}-ng" }

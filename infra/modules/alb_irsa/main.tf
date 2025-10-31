@@ -9,18 +9,18 @@ data "aws_iam_policy_document" "trust" {
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
     principals {
-      type = "Federated"
+      type        = "Federated"
       identifiers = [var.oidc_provider_arn]
     }
     condition {
-      test = "StringEquals"
+      test     = "StringEquals"
       variable = "${local.oidc_hostpath}:aud"
-      values = ["sts.amazonaws.com"]
+      values   = ["sts.amazonaws.com"]
     }
     condition {
-      test = "StringEquals"
+      test     = "StringEquals"
       variable = "${local.oidc_hostpath}:sub"
-      values = ["system:serviceaccount/${var.sa_namespace}:${var.sa_name}"]
+      values   = ["system:serviceaccount/${var.sa_namespace}:${var.sa_name}"]
     }
   }
 }

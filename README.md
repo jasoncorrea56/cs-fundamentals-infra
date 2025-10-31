@@ -124,3 +124,12 @@ aws eks describe-cluster --name csf-cluster --region us-west-2 --query 'cluster.
 
 aws eks describe-nodegroup --cluster-name csf-cluster --nodegroup-name csf-cluster-ng --region us-west-2 --query 'nodegroup.status'
 ```
+
+## Terraform Linting
+
+From the project root, format and validate all Terraform files.
+
+```bash
+terraform fmt -recursive
+terraform validate
+```
