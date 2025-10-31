@@ -1,3 +1,8 @@
+locals {
+  app_ns = "default"
+  app_sa = "csf-app" # ServiceAccount for the app
+}
+
 module "ecr_csf" {
   source = "../../modules/ecr"
   name   = "cs-fundamentals"
@@ -53,11 +58,27 @@ module "externaldns_irsa" {
 }
 
 module "externaldns_chart" {
-  source        = "../../modules/externaldns_chart"
-  cluster_name  = module.eks.cluster_name
-  role_arn      = module.externaldns_irsa.role_arn
-  owner_id      = module.eks.cluster_name
+  source       = "../../modules/externaldns_chart"
+  cluster_name = module.eks.cluster_name
+  role_arn     = module.externaldns_irsa.role_arn
+  owner_id     = module.eks.cluster_name
   # Optional: Narrow scope
   # domain_filters = ["domain.com"]
   # zone_id_filters = ["Z123ABCDEF..."]
+}
+
+module "db_secret" {
+  source = "../../modules/asm_secret"
+  name   = "csf/db-url"
+  db_url = "postgresql://user:pass@host:5432/dbname" # placeholder; edit as needed
+}
+
+module "irsa_db" {
+  source            = "../../modules/irsa_secrets"
+  cluster_name      = module.eks.cluster_name
+  oidc_provider_arn = module.irsa.oidc_provider_arn
+  namespace         = local.app_ns
+  service_account   = local.app_sa
+  role_name         = "csf-app-secrets-role"
+  secret_arn        = module.db_secret.arn
 }

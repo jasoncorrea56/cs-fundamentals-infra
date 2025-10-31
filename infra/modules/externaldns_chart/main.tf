@@ -1,7 +1,7 @@
 resource "kubernetes_service_account" "sa" {
   metadata {
-    name        = var.sa_name
-    namespace   = var.namespace
+    name      = var.sa_name
+    namespace = var.namespace
     annotations = {
       "eks.amazonaws.com/role-arn" = var.role_arn
     }
@@ -43,7 +43,7 @@ resource "helm_release" "externaldns" {
     value = var.sa_name
   }
   set {
-    name = "sources"
+    name  = "sources"
     value = "{ingress,service}"
   }
 
