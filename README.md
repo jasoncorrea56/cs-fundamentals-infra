@@ -86,7 +86,7 @@ terraform apply -auto-approve \
 
 ### Configure Terraform backend for Remote State
 
-Update `envs/prod/backend.hcl` with the S3 bucket and DynamoDB table from the output of apply.
+Update `envs/prod/backend.hcl` with the S3 bucket and DynamoDB table from the output of apply above.
 
 Run the command below to configure Terraform's remote state location:
 
@@ -113,4 +113,14 @@ terraform login
 terraform init -upgrade
 terraform plan
 terraform apply
+```
+
+## Verify EKS Cluster
+
+Run the CLI commands below to confirm the cluster and nodegroup are `ACTIVE`.
+
+```bash
+aws eks describe-cluster --name csf-cluster --region us-west-2 --query 'cluster.status'
+
+aws eks describe-nodegroup --cluster-name csf-cluster --nodegroup-name csf-cluster-ng --region us-west-2 --query 'nodegroup.status'
 ```

@@ -20,12 +20,7 @@ module "eks" {
   node_role_arn    = aws_iam_role.eks_node.arn
 }
 
-# ------------ Outputs ------------ #
-
-output "ecr_repository_url" {
-  value = module.ecr_csf.repository_url
-}
-
-output "vpc_id" {
-  value = module.vpc.vpc_id
+module "irsa" {
+  source       = "../../modules/irsa"
+  cluster_name = module.eks.cluster_name
 }
