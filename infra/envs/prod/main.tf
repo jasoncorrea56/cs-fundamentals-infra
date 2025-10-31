@@ -1,6 +1,6 @@
 locals {
   app_ns = "default"
-  app_sa = "csf-app" # ServiceAccount for the app
+  app_sa = "csf-app" # ServiceAccount
 }
 
 module "ecr_csf" {
@@ -70,7 +70,7 @@ module "externaldns_chart" {
 module "db_secret" {
   source = "../../modules/asm_secret"
   name   = "csf/db-url"
-  db_url = "postgresql://user:pass@host:5432/dbname" # placeholder; edit as needed
+  db_url = "postgresql://user:pass@host:5432/dbname" # Not a real secret, just for demo purposes
 }
 
 module "irsa_db" {
@@ -81,4 +81,12 @@ module "irsa_db" {
   service_account   = local.app_sa
   role_name         = "csf-app-secrets-role"
   secret_arn        = module.db_secret.arn
+}
+
+module "csi_driver" {
+  source = "../../modules/csi_driver_chart"
+}
+
+module "csi_aws_provider" {
+  source = "../../modules/csi_aws_provider_chart"
 }
