@@ -133,3 +133,13 @@ From the project root, format and validate all Terraform files.
 terraform fmt -recursive
 terraform validate
 ```
+
+## Secrets
+
+Secrets are retrieved from `infra/envs/prod/*.tfvars` at runtime. Although `cs-fundamentals` does not require secrets at this time, it has been wired up to support them for future use.
+
+The only secret `db_url` is used for demo purposes. Specify in your local .tfvars prior to running `terraform apply -auto-approve`:
+
+```bash
+db_url = "postgresql://user_name:password@host_name:5432/dbname"
+```

@@ -20,7 +20,9 @@ data "aws_iam_policy_document" "trust" {
     condition {
       test     = "StringEquals"
       variable = "${local.oidc_hostpath}:sub"
-      values   = ["system:serviceaccount/${var.sa_namespace}:${var.sa_name}"]
+      values = [
+        "system:serviceaccount:kube-system:aws-load-balancer-controller"
+      ]
     }
   }
 }

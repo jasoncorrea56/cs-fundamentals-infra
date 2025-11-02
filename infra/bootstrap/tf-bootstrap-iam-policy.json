@@ -74,7 +74,15 @@
 				"ecr:GetRepositoryPolicy",
 				"ecr:TagResource",
 				"ecr:ListTagsForResource",
-				"ecr:ListImages"
+				"ecr:DescribeImages",
+				"ecr:ListImages",
+				"ecr:PutImage",
+				"ecr:GetAuthorizationToken",
+				"ecr:BatchCheckLayerAvailability",
+				"ecr:BatchGetImage",
+				"ecr:CompleteLayerUpload",
+				"ecr:InitiateLayerUpload",
+				"ecr:UploadLayerPart"
 			],
 			"Resource": "*"
 		},
@@ -182,16 +190,39 @@
 			"Effect": "Allow",
 			"Action": [
 				"secretsmanager:CreateSecret",
-				"secretsmanager:ListSecrets",
-				"secretsmanager:GetResourcePolicy",
+				"secretsmanager:DeleteSecret",
 				"secretsmanager:DescribeSecret",
-				"secretsmanager:TagResource",
 				"secretsmanager:GetSecretValue",
-				"secretsmanager:UpdateSecret",
+				"secretsmanager:ListSecrets",
 				"secretsmanager:PutSecretValue",
-				"secretsmanager:DeleteSecret"
+				"secretsmanager:RestoreSecret",
+				"secretsmanager:UpdateSecret",
+				"secretsmanager:GetResourcePolicy",
+				"secretsmanager:TagResource"
 			],
 			"Resource": "arn:aws:secretsmanager:us-west-2:948319129176:secret:csf/db-url-*"
+		},
+		{
+			"Sid": "IamUpdateAssumeRolePolicy",
+			"Effect": "Allow",
+			"Action": "iam:UpdateAssumeRolePolicy",
+			"Resource": "arn:aws:iam::948319129176:role/csf-alb-controller-role"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"iam:CreateRole",
+				"iam:GetRole",
+				"iam:UpdateAssumeRolePolicy",
+				"iam:AttachRolePolicy",
+				"iam:DetachRolePolicy",
+				"iam:PassRole",
+				"iam:ListOpenIDConnectProviders",
+				"iam:GetOpenIDConnectProvider"
+			],
+			"Resource": [
+				"arn:aws:iam::948319129176:role/csf-*"
+			]
 		}
 	]
 }

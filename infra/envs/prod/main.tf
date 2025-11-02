@@ -90,3 +90,19 @@ module "csi_driver" {
 module "csi_aws_provider" {
   source = "../../modules/csi_aws_provider_chart"
 }
+
+module "secret_sync" {
+  source          = "../../modules/secret_sync"
+  namespace       = local.app_ns
+  app_sa          = local.app_sa
+  role_arn        = module.irsa_db.role_arn
+  spc_name        = "csf-db-spc"
+  secret_name     = "csf/db-url"
+  k8s_secret_name = "csf-db"
+  region          = "us-west-2"
+
+  depends_on = [
+    module.csi_driver,
+    module.csi_aws_provider
+  ]
+}

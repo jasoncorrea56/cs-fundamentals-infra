@@ -5,6 +5,10 @@ resource "helm_release" "csi_driver" {
   chart      = "secrets-store-csi-driver"
 
   set {
+    name  = "installCRDs"
+    value = "true"
+  }
+  set {
     name  = "syncSecret.enabled"
     value = "true"
   }
