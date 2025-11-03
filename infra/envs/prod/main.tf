@@ -106,3 +106,20 @@ module "secret_sync" {
     module.csi_aws_provider
   ]
 }
+
+module "cluster_autoscaler_irsa" {
+  source            = "../../modules/cluster_autoscaler_irsa"
+  cluster_name      = module.eks.cluster_name
+  oidc_provider_arn = module.irsa.oidc_provider_arn
+  namespace         = "kube-system"
+  service_account   = "cluster-autoscaler-aws-cluster-autoscaler"
+  role_name         = "csf-cluster-autoscaler-role"
+}
+
+module "cluster_autoscaler" {
+  source       = "../../modules/cluster_autoscaler_chart"
+  cluster_name = module.eks.cluster_name
+  region       = "us-west-2"
+  role_arn     = module.cluster_autoscaler_irsa.role_arn
+  # chart_version   = "9.45.0" # Optional pin
+}

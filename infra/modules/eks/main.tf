@@ -26,5 +26,9 @@ resource "aws_eks_node_group" "default" {
   ami_type       = "AL2_x86_64"
   instance_types = ["t3.medium"]
 
-  tags = { Name = "${var.cluster_name}-ng" }
+  tags = {
+    Name                                    = "${var.cluster_name}-ng"
+    "k8s.io/cluster-autoscaler/enabled"     = "true"
+    "k8s.io/cluster-autoscaler/csf-cluster" = "owned"
+  }
 }
