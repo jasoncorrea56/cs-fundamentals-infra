@@ -123,3 +123,39 @@ module "cluster_autoscaler" {
   role_arn     = module.cluster_autoscaler_irsa.role_arn
   # chart_version   = "9.45.0" # Optional pin
 }
+
+module "cloudwatch_irsa_agent" {
+  source            = "../../modules/cloudwatch_irsa_agent"
+  cluster_name      = module.eks.cluster_name
+  oidc_provider_arn = module.irsa.oidc_provider_arn
+  namespace         = "amazon-cloudwatch"
+  service_account   = "cloudwatch-agent"
+  role_name         = "csf-cloudwatch-agent-role"
+}
+
+module "fluentbit_irsa" {
+  source            = "../../modules/fluentbit_irsa"
+  cluster_name      = module.eks.cluster_name
+  oidc_provider_arn = module.irsa.oidc_provider_arn
+  namespace         = "amazon-cloudwatch"
+  service_account   = "aws-for-fluent-bit"
+  role_name         = "csf-fluent-bit-role"
+}
+
+module "cloudwatch_agent_chart" {
+  source       = "../../modules/cloudwatch_agent_chart"
+  cluster_name = module.eks.cluster_name
+  region       = "us-west-2"
+  role_arn     = module.cloudwatch_irsa_agent.role_arn
+  # chart_version = "x.y.z"
+  depends_on = [module.irsa]
+}
+
+module "aws_for_fluent_bit_chart" {
+  source       = "../../modules/aws_for_fluent_bit_chart"
+  cluster_name = module.eks.cluster_name
+  region       = "us-west-2"
+  role_arn     = module.fluentbit_irsa.role_arn
+  # chart_version = "x.y.z"
+  depends_on = [module.irsa]
+}

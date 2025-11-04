@@ -223,6 +223,25 @@
 			"Resource": [
 				"arn:aws:iam::948319129176:role/csf-*"
 			]
+		},
+		{
+			"Sid": "EKSObservabilityInline",
+			"Effect": "Allow",
+			"Action": [
+				"iam:CreateRole",
+				"iam:DeleteRole",
+				"iam:GetRolePolicy",
+				"iam:PutRolePolicy",
+				"iam:DeleteRolePolicy",
+				"iam:AttachRolePolicy",
+				"iam:DetachRolePolicy",
+				"iam:TagRole",
+				"iam:PassRole"
+			],
+			"Resource": [
+				"arn:aws:iam::*:role/csf-cloudwatch-agent-role",
+				"arn:aws:iam::*:role/csf-fluent-bit-role"
+			]
 		}
 	]
 }
