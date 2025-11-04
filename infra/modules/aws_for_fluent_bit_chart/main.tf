@@ -21,9 +21,11 @@ resource "helm_release" "aws_for_fluent_bit" {
         region          = var.region
         logGroupName    = "/aws/containerinsights/${var.cluster_name}/application"
         logStreamPrefix = "fluentbit-"
-        autoCreateGroup = true
+        autoCreateGroup = false
       }
-      parseLog = { enabled = true }
+      parseLog = {
+        enabled = true
+      }
       fluentBit = {
         # Default input tail for container logs - tweak filters as needed
       }

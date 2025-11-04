@@ -242,6 +242,22 @@
 				"arn:aws:iam::*:role/csf-cloudwatch-agent-role",
 				"arn:aws:iam::*:role/csf-fluent-bit-role"
 			]
+		},
+		{
+			"Sid": "AllowManageCWLogsForContainerInsights",
+			"Effect": "Allow",
+			"Action": [
+				"logs:CreateLogGroup",
+				"logs:PutRetentionPolicy",
+				"logs:ListTagsForResource",
+				"logs:TagLogGroup",
+				"logs:DescribeLogGroups",
+				"logs:DeleteLogGroup"
+			],
+			"Resource": [
+				"arn:aws:logs:us-west-2:948319129176:log-group:/aws/containerinsights/*",
+				"arn:aws:logs:us-west-2:948319129176:log-group::log-stream:"
+			]
 		}
 	]
 }
