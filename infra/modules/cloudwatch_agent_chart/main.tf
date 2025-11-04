@@ -16,6 +16,7 @@ resource "helm_release" "cloudwatch_agent" {
           "eks.amazonaws.com/role-arn" = var.role_arn
         }
       }
+      clusterName = var.cluster_name
       # Turn on Container Insights for EKS
       containerInsights = {
         enabled     = true

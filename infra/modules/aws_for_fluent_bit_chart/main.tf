@@ -23,6 +23,7 @@ resource "helm_release" "aws_for_fluent_bit" {
         logStreamPrefix = "fluentbit-"
         autoCreateGroup = false
       }
+      clusterName = var.cluster_name
       parseLog = {
         enabled = true
       }
