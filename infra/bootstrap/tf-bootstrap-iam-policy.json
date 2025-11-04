@@ -258,6 +258,36 @@
 				"arn:aws:logs:us-west-2:948319129176:log-group:/aws/containerinsights/*",
 				"arn:aws:logs:us-west-2:948319129176:log-group::log-stream:"
 			]
+		},
+		{
+			"Sid": "AllowManageRoute53",
+			"Effect": "Allow",
+			"Action": [
+				"route53:CreateHostedZone",
+				"route53:GetHostedZone",
+				"route53:ListHostedZones",
+				"route53:ListHostedZonesByName",
+				"route53:ChangeResourceRecordSets",
+				"route53:ListResourceRecordSets",
+				"route53:GetChange",
+				"route53:GetDNSSEC",
+				"route53:DeleteHostedZone",
+				"route53:ListTagsForResource"
+			],
+			"Resource": "*"
+		},
+		{
+			"Sid": "AllowManageCertificates",
+			"Effect": "Allow",
+			"Action": [
+				"acm:RequestCertificate",
+				"acm:DescribeCertificate",
+				"acm:ListCertificates",
+				"acm:DeleteCertificate",
+				"acm:AddTagsToCertificate",
+				"acm:ListTagsForCertificate"
+			],
+			"Resource": "*"
 		}
 	]
 }

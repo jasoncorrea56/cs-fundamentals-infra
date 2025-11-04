@@ -58,13 +58,13 @@ module "externaldns_irsa" {
 }
 
 module "externaldns_chart" {
-  source       = "../../modules/externaldns_chart"
-  cluster_name = module.eks.cluster_name
-  role_arn     = module.externaldns_irsa.role_arn
-  owner_id     = module.eks.cluster_name
-  # Optional: Narrow scope
-  # domain_filters = ["domain.com"]
-  # zone_id_filters = ["Z123ABCDEF..."]
+  source         = "../../modules/externaldns_chart"
+  cluster_name   = module.eks.cluster_name
+  role_arn       = module.externaldns_irsa.role_arn
+  owner_id       = module.eks.cluster_name
+  domain_filters = [module.route53_zone.zone_name]
+  # domain_filters  = [regexreplace(var.app_domain, "/^[^.]+\\./", "")]
+  zone_id_filters = [var.hosted_zone_id]
 }
 
 module "db_secret" {
@@ -158,4 +158,18 @@ module "aws_for_fluent_bit_chart" {
   role_arn     = module.fluentbit_irsa.role_arn
   # chart_version = "x.y.z"
   depends_on = [module.irsa]
+}
+
+module "acm_csf" {
+  source            = "../../modules/acm_cert"
+  domain_name       = var.app_domain
+  enable_validation = false
+  hosted_zone_id    = module.route53_zone.zone_id
+  region            = "us-west-2"
+  # subject_alternative_names = ["www.${var.app_domain}"] # Optional
+}
+
+module "route53_zone" {
+  source    = "../../modules/route53_zone"
+  zone_name = var.zone_name # "jasoncorrea.com"
 }
