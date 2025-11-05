@@ -47,7 +47,6 @@ resource "helm_release" "externaldns" {
     value = "{ingress,service}"
   }
 
-  # Optional scoping (use one or both)
   dynamic "set" {
     for_each = length(var.domain_filters) > 0 ? [1] : []
     content {

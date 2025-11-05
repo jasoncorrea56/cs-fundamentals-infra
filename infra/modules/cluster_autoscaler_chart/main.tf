@@ -6,7 +6,7 @@ resource "helm_release" "cluster_autoscaler" {
   chart      = "cluster-autoscaler"
   version    = var.chart_version
 
-  # Create SA + annotate with the IRSA role
+  # Create SA and annotate with the IRSA role
   set {
     name  = "serviceAccount.create"
     value = "true"
@@ -20,19 +20,18 @@ resource "helm_release" "cluster_autoscaler" {
     value = var.role_arn
   }
 
-  # Auto-discovery by cluster name; matches your nodegroup tags you already set
+  # Auto-discovery by cluster name (matches your nodegroup tags)
   set {
     name  = "autoDiscovery.clusterName"
     value = var.cluster_name
   }
 
-  # Region & some safe defaults
+  # Region and some safe defaults
   set {
     name  = "awsRegion"
     value = var.region
   }
 
-  # Tolerate everything (optional), small resources
   set {
     name  = "extraArgs.scale-down-unneeded-time"
     value = "10m"

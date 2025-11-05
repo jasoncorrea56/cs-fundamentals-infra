@@ -58,12 +58,11 @@ module "externaldns_irsa" {
 }
 
 module "externaldns_chart" {
-  source         = "../../modules/externaldns_chart"
-  cluster_name   = module.eks.cluster_name
-  role_arn       = module.externaldns_irsa.role_arn
-  owner_id       = module.eks.cluster_name
-  domain_filters = [module.route53_zone.zone_name]
-  # domain_filters  = [regexreplace(var.app_domain, "/^[^.]+\\./", "")]
+  source          = "../../modules/externaldns_chart"
+  cluster_name    = module.eks.cluster_name
+  role_arn        = module.externaldns_irsa.role_arn
+  owner_id        = module.eks.cluster_name
+  domain_filters  = [module.route53_zone.zone_name]
   zone_id_filters = [var.hosted_zone_id]
 }
 

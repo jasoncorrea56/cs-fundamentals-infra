@@ -36,7 +36,7 @@ resource "aws_s3_bucket_versioning" "versioning" {
   }
 }
 
-# Server-side encryption (AES256 is fine; add KMS later if you want)
+# Server-side encryption (AES256)
 resource "aws_s3_bucket_server_side_encryption_configuration" "sse" {
   bucket = aws_s3_bucket.tfstate.id
   rule {
