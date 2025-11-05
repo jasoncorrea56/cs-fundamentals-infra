@@ -1,5 +1,5 @@
 locals {
-  app_ns = "default"
+  app_ns = "csf"
   app_sa = "csf-app" # ServiceAccount
 }
 
@@ -172,4 +172,32 @@ module "acm_csf" {
 module "route53_zone" {
   source    = "../../modules/route53_zone"
   zone_name = var.zone_name # "jasoncorrea.com"
+}
+
+module "security_policies" {
+  source        = "../../modules/security_policies"
+  namespace     = local.app_ns
+  app_port      = 8080
+  ingress_cidrs = [module.vpc.cidr_block]
+
+  app_selector = {
+    key   = "app.kubernetes.io/name"
+    value = "cs-fundamentals"
+  }
+
+  allow_db_egress = {
+    enabled = true
+    cidrs   = [module.vpc.cidr_block]
+    ports   = [5432]
+  }
+
+  allow_https_egress = {
+    enabled = true
+  }
+
+  depends_on = [
+    module.eks,
+    module.alb_controller_chart,
+    module.externaldns_chart
+  ]
 }
