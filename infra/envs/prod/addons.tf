@@ -34,5 +34,5 @@ resource "aws_eks_addon" "ebs_csi" {
   resolve_conflicts_on_update = "OVERWRITE"
   service_account_role_arn    = aws_iam_role.ebs_csi_irsa.arn
 
-  depends_on                  = [aws_iam_role.ebs_csi_irsa]
+  depends_on = [aws_iam_role.ebs_csi_irsa]
 }

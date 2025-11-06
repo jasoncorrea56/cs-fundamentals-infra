@@ -100,7 +100,7 @@ resource "aws_iam_role" "gha_deployer" {
 # --- Minimal Permissions --- #
 data "aws_iam_policy_document" "gha_permissions" {
   statement {
-    sid     = "EcrPush"
+    sid = "EcrPush"
     actions = [
       "ecr:GetAuthorizationToken",
       "ecr:BatchCheckLayerAvailability",
@@ -116,7 +116,7 @@ data "aws_iam_policy_document" "gha_permissions" {
   }
 
   statement {
-    sid     = "EksDescribe"
+    sid = "EksDescribe"
     actions = [
       "eks:DescribeCluster",
       "eks:ListClusters"
@@ -148,7 +148,7 @@ resource "aws_iam_role" "ebs_csi_irsa" {
     Statement = [{
       Effect = "Allow",
       Principal = {
-        Federated = module.irsa.oidc_provider_arn   # you already output this
+        Federated = module.irsa.oidc_provider_arn # you already output this
       },
       Action = "sts:AssumeRoleWithWebIdentity",
       Condition = {

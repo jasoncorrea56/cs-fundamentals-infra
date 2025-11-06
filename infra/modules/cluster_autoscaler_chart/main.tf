@@ -12,7 +12,7 @@ resource "helm_release" "cluster_autoscaler" {
     yamlencode({
       image = {
         repository = "registry.k8s.io/autoscaling/cluster-autoscaler"
-        tag        = "v1.33.0"
+        tag        = "v1.34.0"
       }
     })
   ]

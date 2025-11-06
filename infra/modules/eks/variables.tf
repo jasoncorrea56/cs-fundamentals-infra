@@ -5,5 +5,5 @@ variable "cluster_role_arn" { type = string }
 variable "node_role_arn" { type = string }
 variable "kubernetes_version" {
   type    = string
-  default = "1.33"
+  default = "1.34"
 }
