@@ -82,7 +82,8 @@
 				"ecr:BatchGetImage",
 				"ecr:CompleteLayerUpload",
 				"ecr:InitiateLayerUpload",
-				"ecr:UploadLayerPart"
+				"ecr:UploadLayerPart",
+				"ecr:GetDownloadUrlForLayer"
 			],
 			"Resource": "*"
 		},

@@ -5,5 +5,5 @@ variable "cluster_role_arn" { type = string }
 variable "node_role_arn" { type = string }
 variable "k8s_version" {
   type    = string
-  default = "1.30"
+  default = "1.32"
 }
