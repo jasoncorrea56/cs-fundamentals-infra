@@ -12,5 +12,5 @@ variable "sa_name" {
 }
 variable "chart_version" {
   type    = string
-  default = "1.9.1"
+  default = "1.10.0"
 }

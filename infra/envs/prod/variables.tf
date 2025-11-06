@@ -20,3 +20,15 @@ variable "zone_name" {
   type        = string
   default     = null
 }
+
+variable "cluster_name" {
+  type        = string
+  description = "EKS cluster name"
+  default     = "csf-cluster"
+}
+
+variable "kubernetes_version" {
+  type        = string
+  description = "EKS minor version, i.e. 1.33"
+  default     = "1.33"
+}

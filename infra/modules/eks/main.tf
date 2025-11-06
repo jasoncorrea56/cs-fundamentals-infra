@@ -2,7 +2,7 @@ resource "aws_eks_cluster" "this" {
   name     = var.cluster_name
   role_arn = var.cluster_role_arn
 
-  version = var.k8s_version
+  version = var.kubernetes_version
   vpc_config {
     subnet_ids = concat(var.public_subnets, var.private_subnets)
   }
@@ -16,6 +16,9 @@ resource "aws_eks_node_group" "default" {
   node_group_name = "${var.cluster_name}-ng"
   node_role_arn   = var.node_role_arn
   subnet_ids      = var.private_subnets
+  version         = var.kubernetes_version
+  ami_type        = "AL2023_x86_64_STANDARD"
+  instance_types  = ["t3.small"]
 
   scaling_config {
     desired_size = 1
@@ -23,8 +26,9 @@ resource "aws_eks_node_group" "default" {
     min_size     = 1
   }
 
-  ami_type       = "AL2_x86_64"
-  instance_types = ["t3.medium"]
+  update_config {
+    max_unavailable = 1
+  }
 
   tags = {
     Name                                    = "${var.cluster_name}-ng"

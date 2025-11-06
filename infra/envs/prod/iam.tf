@@ -134,3 +134,37 @@ resource "aws_iam_role_policy_attachment" "gha_deployer_attach" {
   role       = aws_iam_role.gha_deployer.name
   policy_arn = aws_iam_policy.gha_deployer.arn
 }
+
+# IRSA for the EBS CSI controller
+data "aws_iam_policy" "ebs_csi_managed" {
+  arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+}
+
+resource "aws_iam_role" "ebs_csi_irsa" {
+  name = "csf-ebs-csi-controller-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect = "Allow",
+      Principal = {
+        Federated = module.irsa.oidc_provider_arn   # you already output this
+      },
+      Action = "sts:AssumeRoleWithWebIdentity",
+      Condition = {
+        StringEquals = {
+          # IMPORTANT: replace XXXXX with your OIDC provider ID (already in module.irsa)
+          # Format must match: oidc.eks.<region>.amazonaws.com/id/<OIDC_ID>:sub
+          "${replace(module.irsa.oidc_provider_arn, "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/", "")}:sub" = "system:serviceaccount:kube-system:ebs-csi-controller-sa"
+        }
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ebs_csi_attach" {
+  role       = aws_iam_role.ebs_csi_irsa.name
+  policy_arn = data.aws_iam_policy.ebs_csi_managed.arn
+}
+
+data "aws_caller_identity" "current" {}
