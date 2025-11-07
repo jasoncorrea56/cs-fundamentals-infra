@@ -201,3 +201,30 @@ module "security_policies" {
     module.externaldns_chart
   ]
 }
+
+module "metrics_server_chart" {
+  source = "../../modules/metrics_server_chart"
+  # chart_version = "3.13.0" # Optional pin; leave unset to track repo defaults
+}
+
+module "app_chart" {
+  source = "../../modules/app_chart"
+
+  chart_path  = abspath("${path.module}/../../../../cs-fundamentals/helm")
+  values_file = abspath("${path.module}/../../../../cs-fundamentals/helm/values-prod.yaml")
+
+  release_name = "csf"
+  namespace    = "csf"
+
+  # Optional: override image tag/repo at apply-time without touching values files
+  image_overrides = [
+    # { name = "image.repository", value = "948319129176.dkr.ecr.us-west-2.amazonaws.com/cs-fundamentals" },
+    # { name = "image.tag",        value = "v0.2.3" },
+  ]
+
+  depends_on = [
+    module.irsa_db,
+    module.secret_sync,
+    module.metrics_server_chart
+  ]
+}
