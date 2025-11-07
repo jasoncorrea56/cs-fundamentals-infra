@@ -18,11 +18,11 @@ resource "aws_eks_node_group" "default" {
   subnet_ids      = var.private_subnets
   version         = var.kubernetes_version
   ami_type        = "AL2023_x86_64_STANDARD"
-  instance_types  = ["t3.small"]
+  instance_types  = ["t3.medium"]
 
   scaling_config {
-    desired_size = 1
-    max_size     = 3
+    desired_size = 2
+    max_size     = 4
     min_size     = 1
   }
 

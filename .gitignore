@@ -41,3 +41,7 @@ terraform.rc
 
 # VSCode
 .vscode/
+
+# Zipfiles
+*.zip
+
