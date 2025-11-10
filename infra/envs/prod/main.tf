@@ -171,7 +171,7 @@ module "acm_csf" {
 
 module "route53_zone" {
   source    = "../../modules/route53_zone"
-  zone_name = var.zone_name # "jasoncorrea.com"
+  zone_name = var.zone_name
 }
 
 module "security_policies" {
@@ -213,13 +213,14 @@ module "app_chart" {
   chart_path  = abspath("${path.module}/../../../../cs-fundamentals/helm")
   values_file = abspath("${path.module}/../../../../cs-fundamentals/helm/values-prod.yaml")
 
-  release_name = "csf"
-  namespace    = "csf"
+  acm_certificate_arn = module.acm_csf.certificate_arn
+  namespace           = "csf"
+  release_name        = "csf"
 
   # Optional: override image tag/repo at apply-time without touching values files
   image_overrides = [
     # { name = "image.repository", value = "948319129176.dkr.ecr.us-west-2.amazonaws.com/cs-fundamentals" },
-    # { name = "image.tag",        value = "v0.2.3" },
+    # { name = "image.tag",        value = "v0.2.5" },
   ]
 
   depends_on = [

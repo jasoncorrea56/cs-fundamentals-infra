@@ -1,4 +1,4 @@
 variable "zone_name" {
-  description = "Base domain, e.g. jasoncorrea.com"
+  description = "Base domain - example-domain.com"
   type        = string
 }

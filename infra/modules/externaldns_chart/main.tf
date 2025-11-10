@@ -47,18 +47,13 @@ resource "helm_release" "externaldns" {
     value = "{ingress,service}"
   }
 
-  dynamic "set" {
-    for_each = length(var.domain_filters) > 0 ? [1] : []
-    content {
-      name  = "domainFilters"
-      value = join(",", var.domain_filters)
-    }
+  set_list {
+    name  = "domainFilters"
+    value = var.domain_filters
   }
-  dynamic "set" {
-    for_each = length(var.zone_id_filters) > 0 ? [1] : []
-    content {
-      name  = "zoneIdFilters"
-      value = join(",", var.zone_id_filters)
-    }
+
+  set_list {
+    name  = "zoneIdFilters"
+    value = var.zone_id_filters
   }
 }

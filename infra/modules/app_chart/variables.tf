@@ -28,3 +28,9 @@ variable "image_overrides" {
   description = "Optional list of helm set overrides for image repo/tag, etc."
   default     = []
 }
+
+variable "acm_certificate_arn" {
+  type        = string
+  description = "ACM certificate ARN for ALB HTTPS; if empty, no override is set"
+  default     = ""
+}
