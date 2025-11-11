@@ -168,3 +168,24 @@ resource "aws_iam_role_policy_attachment" "ebs_csi_attach" {
 }
 
 data "aws_caller_identity" "current" {}
+
+resource "aws_iam_role_policy" "eks_node_externaldns_route53" {
+  name = "csf-eks-node-externaldns-route53"
+  role = aws_iam_role.eks_node.name
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "route53:ChangeResourceRecordSets",
+          "route53:ListHostedZones",
+          "route53:ListResourceRecordSets",
+          "route53:ListTagsForResource",
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}

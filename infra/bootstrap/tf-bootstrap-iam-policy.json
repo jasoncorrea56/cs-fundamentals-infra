@@ -100,7 +100,10 @@
 				"eks:ListNodegroups",
 				"eks:UpdateNodegroupConfig",
 				"eks:UpdateNodegroupVersion",
-				"eks:DescribeAddonVersions"
+				"eks:DescribeAddonVersions",
+				"elasticloadbalancing:DescribeLoadBalancers",
+				"elasticloadbalancing:DescribeLoadBalancerAttributes",
+				"elasticloadbalancing:DescribeTags"
 			],
 			"Resource": "*"
 		},
@@ -134,6 +137,9 @@
 				"iam:GetPolicyVersion",
 				"iam:AttachRolePolicy",
 				"iam:DetachRolePolicy",
+				"iam:DeleteRolePolicy",
+				"iam:GetRolePolicy",
+				"iam:PutRolePolicy",
 				"iam:ListRolePolicies",
 				"iam:ListPolicyVersions",
 				"iam:ListAttachedRolePolicies",
@@ -145,6 +151,7 @@
 				"iam:DeleteOpenIDConnectProvider",
 				"iam:GetOpenIDConnectProvider",
 				"iam:ListOpenIDConnectProviders",
+				"iam:UpdateOpenIDConnectProviderThumbprint",
 				"iam:UpdateAssumeRolePolicy"
 			],
 			"Resource": "*"
@@ -197,11 +204,11 @@
 			],
 			"Resource": "arn:aws:logs:us-west-2:948319129176:log-group:/aws/containerinsights/*:*"
 		},
-        {
-            "Effect": "Allow",
-            "Action": "logs:ListTagsForResource",
-            "Resource": "arn:aws:logs:us-west-2:948319129176:log-group:/aws/containerinsights/*"
-        },
+		{
+			"Effect": "Allow",
+			"Action": "logs:ListTagsForResource",
+			"Resource": "arn:aws:logs:us-west-2:948319129176:log-group:/aws/containerinsights/*"
+		},
 		{
 			"Effect": "Allow",
 			"Action": [

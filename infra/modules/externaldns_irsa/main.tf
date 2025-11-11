@@ -1,4 +1,6 @@
-data "aws_eks_cluster" "this" { name = var.cluster_name }
+data "aws_eks_cluster" "this" {
+  name = var.cluster_name
+}
 
 locals {
   oidc_url      = data.aws_eks_cluster.this.identity[0].oidc[0].issuer
@@ -7,20 +9,23 @@ locals {
 
 data "aws_iam_policy_document" "trust" {
   statement {
-    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect = "Allow"
+    actions = [
+      "sts:AssumeRoleWithWebIdentity",
+    ]
+
     principals {
       type        = "Federated"
       identifiers = [var.oidc_provider_arn]
     }
-    condition {
-      test     = "StringEquals"
-      variable = "${local.oidc_hostpath}:aud"
-      values   = ["sts.amazonaws.com"]
-    }
+
+    # Strictly bind to the ExternalDNS ServiceAccount in kube-system
     condition {
       test     = "StringEquals"
       variable = "${local.oidc_hostpath}:sub"
-      values   = ["system:serviceaccount/${var.namespace}:${var.sa_name}"]
+      values = [
+        "system:serviceaccount:${var.namespace}:${var.sa_name}"
+      ]
     }
   }
 }
@@ -30,20 +35,31 @@ resource "aws_iam_role" "this" {
   assume_role_policy = data.aws_iam_policy_document.trust.json
 }
 
-# DNS permissions
 resource "aws_iam_policy" "dns" {
   name = "${var.role_name}-policy"
+
   policy = jsonencode({
     Version = "2012-10-17",
-    Statement = [{
-      Effect = "Allow",
-      Action = [
-        "route53:ChangeResourceRecordSets",
-        "route53:ListHostedZones",
-        "route53:ListResourceRecordSets"
-      ],
-      Resource = "*"
-    }]
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "route53:ChangeResourceRecordSets",
+        ]
+        Resource = [
+          "arn:aws:route53:::hostedzone/*",
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "route53:ListHostedZones",
+          "route53:ListResourceRecordSets",
+          "route53:ListTagsForResource",
+        ]
+        Resource = ["*"]
+      }
+    ]
   })
 }
 

@@ -56,15 +56,20 @@ module "externaldns_irsa" {
   source            = "../../modules/externaldns_irsa"
   cluster_name      = module.eks.cluster_name
   oidc_provider_arn = module.irsa.oidc_provider_arn
+  namespace         = "kube-system"
+  sa_name           = "external-dns"
+  role_name         = "csf-externaldns-role"
 }
 
 module "externaldns_chart" {
   source          = "../../modules/externaldns_chart"
   cluster_name    = module.eks.cluster_name
+  namespace       = "kube-system"
+  sa_name         = "external-dns"
   role_arn        = module.externaldns_irsa.role_arn
   owner_id        = module.eks.cluster_name
   domain_filters  = [module.route53_zone.zone_name]
-  zone_id_filters = [var.hosted_zone_id]
+  zone_id_filters = [module.route53_zone.zone_id]
 }
 
 module "db_secret" {
@@ -161,12 +166,17 @@ module "aws_for_fluent_bit_chart" {
 }
 
 module "acm_csf" {
-  source            = "../../modules/acm_cert"
-  domain_name       = var.app_domain
-  enable_validation = false
+  source = "../../modules/acm_cert"
+
+  # App subdomain (csf.example-domain.com)
+  domain_name = var.app_domain
+
+  # Root domain (example-domain.com)
+  subject_alternative_names = [var.zone_name]
+
+  enable_validation = true
   hosted_zone_id    = module.route53_zone.zone_id
   region            = "us-west-2"
-  # subject_alternative_names = ["www.${var.app_domain}"] # Optional
 }
 
 module "route53_zone" {
@@ -204,7 +214,6 @@ module "security_policies" {
 
 module "metrics_server_chart" {
   source = "../../modules/metrics_server_chart"
-  # chart_version = "3.13.0" # Optional pin; leave unset to track repo defaults
 }
 
 module "app_chart" {
