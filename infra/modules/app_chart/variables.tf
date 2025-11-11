@@ -34,3 +34,9 @@ variable "acm_certificate_arn" {
   description = "ACM certificate ARN for ALB HTTPS; if empty, no override is set"
   default     = ""
 }
+
+variable "ingress_hosts" {
+  description = "List of ingress hostnames for this environment"
+  type        = list(string)
+  default     = []
+}

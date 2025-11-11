@@ -226,6 +226,11 @@ module "app_chart" {
   namespace           = "csf"
   release_name        = "csf"
 
+  ingress_hosts = [
+    var.app_domain, # csf.example-domain.com
+    var.zone_name,  # example-domain.com (root)
+  ]
+
   # Optional: override image tag/repo at apply-time without touching values files
   image_overrides = [
     # { name = "image.repository", value = "948319129176.dkr.ecr.us-west-2.amazonaws.com/cs-fundamentals" },

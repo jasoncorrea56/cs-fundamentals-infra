@@ -34,5 +34,28 @@ resource "helm_release" "app" {
     }
   }
 
-  # Note: depends_on handled by caller.
+  dynamic "set" {
+    for_each = var.ingress_hosts
+    content {
+      name  = "ingress.hosts[${set.key}].host"
+      value = set.value
+    }
+  }
+
+  # Ensure at least one path under each host
+  dynamic "set" {
+    for_each = var.ingress_hosts
+    content {
+      name  = "ingress.hosts[${set.key}].paths[0].path"
+      value = "/"
+    }
+  }
+
+  dynamic "set" {
+    for_each = var.ingress_hosts
+    content {
+      name  = "ingress.hosts[${set.key}].paths[0].pathType"
+      value = "Prefix"
+    }
+  }
 }
