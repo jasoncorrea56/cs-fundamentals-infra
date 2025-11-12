@@ -65,32 +65,26 @@ resource "kubernetes_manifest" "github_deployer_clusterrole" {
     apiVersion = "rbac.authorization.k8s.io/v1"
     kind       = "ClusterRole"
     metadata = {
-      name = "github-deployer"
+        name = "github-deployer"
     }
     rules = [
-      # Read core workloads & config (no writes here)
+      # Core reads
       {
         apiGroups = [""]
-        resources = [
-          "pods",
-          "pods/log",
-          "services",
-          "endpoints",
-          "namespaces",
-          "configmaps",
-          "secrets",
-          "serviceaccounts",
-        ]
-        verbs = ["get", "list", "watch"]
+        resources = ["pods", "pods/log", "services", "endpoints", "namespaces", "configmaps"]
+        verbs     = ["get", "list", "watch"]
       },
-      # Manage Deployments/ReplicaSets for Helm releases
+      # Helm release storage (Secrets) — allow full lifecycle
+      {
+        apiGroups = [""]
+        resources = ["secrets"]
+        verbs     = ["get", "list", "watch", "create", "update", "patch", "delete"]
+      },
+      # Manage Deployments/ReplicaSets for Helm upgrades
       {
         apiGroups = ["apps"]
-        resources = [
-          "deployments",
-          "replicasets",
-        ]
-        verbs = ["get", "list", "watch", "create", "update", "patch"]
+        resources = ["deployments", "replicasets"]
+        verbs     = ["get", "list", "watch", "create", "update", "patch"]
       },
       # Allow creating/deleting Jobs for smoke tests
       {
