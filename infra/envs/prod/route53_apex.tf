@@ -18,13 +18,30 @@ locals {
   apex_alias_enabled    = var.enable_apex_alias && length(local.resolved_alb_dns_name) > 0 && length(local.resolved_alb_zone_id) > 0
 }
 
-# NOTE: ExternalDNS manages csf.<zone_name>.
-# This optional record points the zone apex (root) to the ALB.
+# NOTE: ExternalDNS may manage csf.<zone_name>.
+# These records make routing deterministic independent of controller timing.
+
+# 1) Apex (root) -> ALB (optional, guarded by enable_apex_alias)
 resource "aws_route53_record" "apex_domain" {
   count = local.apex_alias_enabled ? 1 : 0
 
   zone_id = module.route53_zone.zone_id
   name    = var.zone_name
+  type    = "A"
+
+  alias {
+    name                   = local.resolved_alb_dns_name
+    zone_id                = local.resolved_alb_zone_id
+    evaluate_target_health = false
+  }
+}
+
+# 2) csf.<zone_name> -> ALB (always created when ALB is resolvable)
+resource "aws_route53_record" "csf_app" {
+  count = length(local.resolved_alb_dns_name) > 0 && length(local.resolved_alb_zone_id) > 0 ? 1 : 0
+
+  zone_id = module.route53_zone.zone_id
+  name    = "csf.${var.zone_name}"
   type    = "A"
 
   alias {
