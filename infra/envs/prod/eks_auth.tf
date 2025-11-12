@@ -53,11 +53,11 @@ resource "kubernetes_config_map_v1" "aws_auth" {
 # ClusterRole: github-deployer
 #
 # Scope:
-# - Read pods/svcs/ing/CM/Secrets for observability
+# - Read pods/svcs/ing/CM/Secrets/SA for observability & Helm
 # - Manage deployments/RS in support of Helm upgrades
 # - Create/delete Jobs for in-cluster smoke tests
 #
-# This is intentionally narrower than cluster-admin.
+# Intentionally much narrower than cluster-admin.
 ############################################################
 
 resource "kubernetes_manifest" "github_deployer_clusterrole" {
@@ -68,7 +68,7 @@ resource "kubernetes_manifest" "github_deployer_clusterrole" {
       name = "github-deployer"
     }
     rules = [
-      # Read core workloads & networking (for status, smoke, etc.)
+      # Read core workloads & config (no writes here)
       {
         apiGroups = [""]
         resources = [
@@ -79,6 +79,7 @@ resource "kubernetes_manifest" "github_deployer_clusterrole" {
           "namespaces",
           "configmaps",
           "secrets",
+          "serviceaccounts",
         ]
         verbs = ["get", "list", "watch"]
       },
