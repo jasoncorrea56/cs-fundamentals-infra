@@ -228,7 +228,6 @@ module "app_chart" {
 
   ingress_hosts = [
     var.app_domain, # csf.example-domain.com
-    var.zone_name,  # example-domain.com (root)
   ]
 
   # Optional: override image tag/repo at apply-time without touching values files
