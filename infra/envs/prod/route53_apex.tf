@@ -1,16 +1,35 @@
+#############################################
+# Optional apex A ALIAS to the app ALB
+# - Prefers explicit vars if provided
+# - Otherwise attempts data lookup by ALB name
+# - Skips creation if inputs are incomplete
+#############################################
+
+# Attempt ALB lookup by name when provided
 data "aws_lb" "csf_alb" {
-  # Match the ALB created by the AWS Load Balancer Controller for the csf ingress
-  name = "k8s-csf-csfcsfun-145ebc3211"
+  count = length(var.alb_name) > 0 ? 1 : 0
+  name  = var.alb_name
 }
 
+# Choose the ALB DNS/zone from either explicit vars or data source
+locals {
+  resolved_alb_dns_name = length(var.alb_dns_name) > 0 ? var.alb_dns_name : (length(var.alb_name) > 0 && length(data.aws_lb.csf_alb) > 0 ? data.aws_lb.csf_alb[0].dns_name : "")
+  resolved_alb_zone_id  = length(var.alb_zone_id) > 0 ? var.alb_zone_id : (length(var.alb_name) > 0 && length(data.aws_lb.csf_alb) > 0 ? data.aws_lb.csf_alb[0].zone_id : "")
+  apex_alias_enabled    = var.enable_apex_alias && length(local.resolved_alb_dns_name) > 0 && length(local.resolved_alb_zone_id) > 0
+}
+
+# NOTE: ExternalDNS manages csf.<zone_name>.
+# This optional record points the zone apex (root) to the ALB.
 resource "aws_route53_record" "apex_domain" {
+  count = local.apex_alias_enabled ? 1 : 0
+
   zone_id = module.route53_zone.zone_id
   name    = var.zone_name
   type    = "A"
 
   alias {
-    name                   = data.aws_lb.csf_alb.dns_name
-    zone_id                = data.aws_lb.csf_alb.zone_id
+    name                   = local.resolved_alb_dns_name
+    zone_id                = local.resolved_alb_zone_id
     evaluate_target_health = false
   }
 }

@@ -234,3 +234,35 @@ resource "kubernetes_manifest" "np_allow_db_egress" {
   }
   depends_on = [kubernetes_network_policy_v1.default_deny_all]
 }
+
+# 6) Allow HTTP egress from any pod in the namespace (Smoke-Test Job)
+#    to the app pods on the service port (var.app_port [80]).
+resource "kubernetes_manifest" "np_allow_http_egress_to_app" {
+  manifest = {
+    apiVersion = "networking.k8s.io/v1"
+    kind       = "NetworkPolicy"
+    metadata = {
+      name      = "allow-http-egress-to-app"
+      namespace = var.namespace
+    }
+    spec = {
+      podSelector = {} # Applies to all pods
+      policyTypes = ["Egress"]
+      egress = [
+        {
+          to = [{
+            podSelector = {
+              matchLabels = {
+                (var.app_selector.key) = var.app_selector.value
+              }
+            }
+          }]
+          ports = [
+            { protocol = "TCP", port = var.app_port } # Matches service port [80]
+          ]
+        }
+      ]
+    }
+  }
+  depends_on = [kubernetes_network_policy_v1.default_deny_all]
+}
