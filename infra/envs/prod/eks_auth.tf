@@ -64,46 +64,60 @@ resource "kubernetes_manifest" "github_deployer_clusterrole" {
   manifest = {
     apiVersion = "rbac.authorization.k8s.io/v1"
     kind       = "ClusterRole"
-    metadata = {
-        name = "github-deployer"
-    }
+    metadata   = { name = "github-deployer" }
     rules = [
-      # Core reads
+      # --- Read-only for troubleshooting ---
       {
         apiGroups = [""]
-        resources = ["pods", "pods/log", "services", "endpoints", "namespaces", "configmaps"]
+        resources = ["pods", "pods/log", "endpoints", "namespaces"]
         verbs     = ["get", "list", "watch"]
       },
-      # Helm release storage (Secrets) — allow full lifecycle
+
+      # --- Core objects Helm creates/updates in your chart ---
       {
         apiGroups = [""]
-        resources = ["secrets"]
+        resources = ["services", "configmaps", "serviceaccounts", "secrets"]
         verbs     = ["get", "list", "watch", "create", "update", "patch", "delete"]
       },
-      # Manage Deployments/ReplicaSets for Helm upgrades
+
+      # --- Workloads (Helm manages these during upgrade/rollback) ---
       {
         apiGroups = ["apps"]
         resources = ["deployments", "replicasets"]
-        verbs     = ["get", "list", "watch", "create", "update", "patch"]
+        verbs     = ["get", "list", "watch", "create", "update", "patch", "delete"]
       },
-      # Allow creating/deleting Jobs for smoke tests
+
+      # --- Policy (PDB) ---
+      {
+        apiGroups = ["policy"]
+        resources = ["poddisruptionbudgets"]
+        verbs     = ["get", "list", "watch", "create", "update", "patch", "delete"]
+      },
+
+      # --- Autoscaling (HPA) ---
+      {
+        apiGroups = ["autoscaling"]
+        resources = ["horizontalpodautoscalers"]
+        verbs     = ["get", "list", "watch", "create", "update", "patch", "delete"]
+      },
+
+      # --- Ingress (ALB-backed) ---
+      {
+        apiGroups = ["networking.k8s.io"]
+        resources = ["ingresses"]
+        verbs     = ["get", "list", "watch", "create", "update", "patch", "delete"]
+      },
+
+      # --- Smoke-test Job lifecycle (from deploy workflow) ---
       {
         apiGroups = ["batch"]
         resources = ["jobs"]
         verbs     = ["get", "list", "watch", "create", "delete"]
       },
-      # Read Ingress for verification
-      {
-        apiGroups = ["networking.k8s.io"]
-        resources = ["ingresses"]
-        verbs     = ["get", "list", "watch"]
-      },
     ]
   }
 
-  depends_on = [
-    kubernetes_config_map_v1.aws_auth,
-  ]
+  depends_on = [kubernetes_config_map_v1.aws_auth]
 }
 
 ############################################################
