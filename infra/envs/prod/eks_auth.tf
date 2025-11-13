@@ -166,7 +166,7 @@ resource "kubernetes_manifest" "github_deployer_clusterrolebinding" {
     subjects = [
       {
         kind     = "Group"
-        name     = "github-deployer" # must match aws-auth groups entry
+        name     = "github-deployer" # Match aws-auth group entry
         apiGroup = "rbac.authorization.k8s.io"
       }
     ]

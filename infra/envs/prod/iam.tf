@@ -148,13 +148,11 @@ resource "aws_iam_role" "ebs_csi_irsa" {
     Statement = [{
       Effect = "Allow",
       Principal = {
-        Federated = module.irsa.oidc_provider_arn # you already output this
+        Federated = module.irsa.oidc_provider_arn
       },
       Action = "sts:AssumeRoleWithWebIdentity",
       Condition = {
         StringEquals = {
-          # IMPORTANT: replace XXXXX with your OIDC provider ID (already in module.irsa)
-          # Format must match: oidc.eks.<region>.amazonaws.com/id/<OIDC_ID>:sub
           "${replace(module.irsa.oidc_provider_arn, "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/", "")}:sub" = "system:serviceaccount:kube-system:ebs-csi-controller-sa"
         }
       }

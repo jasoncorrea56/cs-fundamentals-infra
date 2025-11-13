@@ -1,6 +1,6 @@
 ############################################################
-# EKS core add-ons — let AWS choose the recommended version
-# (no data sources, no extra permissions needed)
+# EKS core add-ons — Let AWS choose the recommended version,
+# no data sources, no extra permissions needed.
 ############################################################
 
 locals {
