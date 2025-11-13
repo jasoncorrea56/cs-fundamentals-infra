@@ -2,68 +2,28 @@
 	"Version": "2012-10-17",
 	"Statement": [
 		{
-			"Sid": "S3BucketAdminForState",
 			"Effect": "Allow",
 			"Action": [
 				"s3:CreateBucket",
 				"s3:DeleteBucket",
-				"s3:GetAccelerateConfiguration",
-				"s3:GetBucketAcl",
-				"s3:GetBucketCORS",
-				"s3:GetBucketLocation",
-				"s3:GetBucketLogging",
-				"s3:GetBucketObjectLockConfiguration",
-				"s3:GetBucketPolicy",
-				"s3:GetBucketPublicAccessBlock",
-				"s3:GetBucketRequestPayment",
-				"s3:GetBucketTagging",
-				"s3:GetBucketVersioning",
-				"s3:GetBucketWebsite",
-				"s3:GetEncryptionConfiguration",
-				"s3:GetLifecycleConfiguration",
-				"s3:GetReplicationConfiguration",
 				"s3:ListBucket",
-				"s3:PutBucketPolicy",
-				"s3:PutBucketPublicAccessBlock",
-				"s3:PutBucketTagging",
-				"s3:PutBucketVersioning",
-				"s3:PutEncryptionConfiguration"
-			],
-			"Resource": "*"
-		},
-		{
-			"Sid": "S3ObjectRWForState",
-			"Effect": "Allow",
-			"Action": [
+				"s3:GetBucket*",
+				"s3:PutBucket*",
+				"s3:GetEncryptionConfiguration",
+				"s3:PutEncryptionConfiguration",
 				"s3:GetObject",
 				"s3:PutObject",
-				"s3:DeleteObject"
-			],
-			"Resource": "*"
-		},
-		{
-			"Sid": "DynamoForLocks",
-			"Effect": "Allow",
-			"Action": [
+				"s3:DeleteObject",
 				"dynamodb:CreateTable",
 				"dynamodb:UpdateTable",
 				"dynamodb:DeleteTable",
-				"dynamodb:DescribeContinuousBackups",
-				"dynamodb:DescribeTable",
-				"dynamodb:DescribeTimeToLive",
+				"dynamodb:Describe*",
 				"dynamodb:GetItem",
 				"dynamodb:PutItem",
 				"dynamodb:DeleteItem",
 				"dynamodb:UpdateItem",
 				"dynamodb:TagResource",
-				"dynamodb:ListTagsOfResource"
-			],
-			"Resource": "*"
-		},
-		{
-			"Sid": "EcrCreateAndManageRepo",
-			"Effect": "Allow",
-			"Action": [
+				"dynamodb:ListTagsOfResource",
 				"ecr:CreateRepository",
 				"ecr:DescribeRepositories",
 				"ecr:DeleteLifecyclePolicy",
@@ -82,14 +42,8 @@
 				"ecr:BatchGetImage",
 				"ecr:CompleteLayerUpload",
 				"ecr:InitiateLayerUpload",
-				"ecr:UploadLayerPart"
-			],
-			"Resource": "*"
-		},
-		{
-			"Sid": "EC2CreateAndManageVpc",
-			"Effect": "Allow",
-			"Action": [
+				"ecr:UploadLayerPart",
+				"ecr:GetDownloadUrlForLayer",
 				"ec2:CreateVpc",
 				"ec2:DeleteVpc",
 				"ec2:ModifyVpcAttribute",
@@ -114,59 +68,23 @@
 				"ec2:CreateNatGateway",
 				"ec2:DeleteNatGateway",
 				"ec2:CreateTags",
-				"ec2:DeleteTags"
-			],
-			"Resource": "*"
-		},
-		{
-			"Sid": "IamCreateAndManage",
-			"Effect": "Allow",
-			"Action": [
-				"iam:CreateRole",
-				"iam:DeleteRole",
-				"iam:GetRole",
-				"iam:PassRole",
-				"iam:TagRole",
-				"iam:CreatePolicy",
-				"iam:DeletePolicy",
-				"iam:GetPolicy",
-				"iam:CreatePolicyVersion",
-				"iam:DeletePolicyVersion",
-				"iam:GetPolicyVersion",
-				"iam:AttachRolePolicy",
-				"iam:DetachRolePolicy",
-				"iam:ListRolePolicies",
-				"iam:ListPolicyVersions",
-				"iam:ListAttachedRolePolicies",
-				"iam:CreateInstanceProfile",
-				"iam:ListInstanceProfilesForRole",
-				"iam:CreateOpenIDConnectProvider",
-				"iam:DeleteOpenIDConnectProvider",
-				"iam:GetOpenIDConnectProvider",
-				"iam:AddRoleToInstanceProfile",
-				"iam:DeleteInstanceProfile"
-			],
-			"Resource": "*"
-		},
-		{
-			"Sid": "CreateSLRForEKS",
-			"Effect": "Allow",
-			"Action": "iam:CreateServiceLinkedRole",
-			"Resource": "*",
-			"Condition": {
-				"StringEquals": {
-					"iam:AWSServiceName": [
-						"eks.amazonaws.com",
-						"eks-nodegroup.amazonaws.com",
-						"autoscaling.amazonaws.com"
-					]
-				}
-			}
-		},
-		{
-			"Sid": "EKSCore",
-			"Effect": "Allow",
-			"Action": [
+				"ec2:DeleteTags",
+				"route53:CreateHostedZone",
+				"route53:GetHostedZone",
+				"route53:ListHostedZones",
+				"route53:ListHostedZonesByName",
+				"route53:ChangeResourceRecordSets",
+				"route53:ListResourceRecordSets",
+				"route53:GetChange",
+				"route53:GetDNSSEC",
+				"route53:DeleteHostedZone",
+				"route53:ListTagsForResource",
+				"acm:RequestCertificate",
+				"acm:DescribeCertificate",
+				"acm:ListCertificates",
+				"acm:DeleteCertificate",
+				"acm:AddTagsToCertificate",
+				"acm:ListTagsForCertificate",
 				"eks:CreateCluster",
 				"eks:DeleteCluster",
 				"eks:DescribeCluster",
@@ -181,12 +99,83 @@
 				"eks:DescribeNodegroup",
 				"eks:ListNodegroups",
 				"eks:UpdateNodegroupConfig",
-				"eks:UpdateNodegroupVersion"
+				"eks:UpdateNodegroupVersion",
+				"eks:DescribeAddonVersions",
+				"elasticloadbalancing:DescribeLoadBalancers",
+				"elasticloadbalancing:DescribeLoadBalancerAttributes",
+				"elasticloadbalancing:DescribeTags",
+				"iam:CreateRole",
+				"iam:DeleteRole",
+				"iam:GetRole",
+				"iam:PassRole",
+				"iam:TagRole",
+				"iam:CreatePolicy",
+				"iam:DeletePolicy",
+				"iam:GetPolicy",
+				"iam:CreatePolicyVersion",
+				"iam:DeletePolicyVersion",
+				"iam:GetPolicyVersion",
+				"iam:AttachRolePolicy",
+				"iam:DetachRolePolicy",
+				"iam:DeleteRolePolicy",
+				"iam:GetRolePolicy",
+				"iam:PutRolePolicy",
+				"iam:ListRolePolicies",
+				"iam:ListPolicyVersions",
+				"iam:ListAttachedRolePolicies",
+				"iam:CreateInstanceProfile",
+				"iam:DeleteInstanceProfile",
+				"iam:AddRoleToInstanceProfile",
+				"iam:ListInstanceProfilesForRole",
+				"iam:CreateOpenIDConnectProvider",
+				"iam:DeleteOpenIDConnectProvider",
+				"iam:GetOpenIDConnectProvider",
+				"iam:ListOpenIDConnectProviders",
+				"iam:UpdateOpenIDConnectProviderThumbprint",
+				"iam:UpdateAssumeRolePolicy",
+				"logs:DescribeLogGroups",
+				"logs:DescribeLogStreams",
+				"logs:ListTagsForResource",
+				"logs:PutRetentionPolicy",
+				"logs:CreateLogGroup"
 			],
 			"Resource": "*"
 		},
 		{
-			"Sid": "SecretsCreateAndManage",
+			"Effect": "Allow",
+			"Action": "iam:CreateServiceLinkedRole",
+			"Resource": "*",
+			"Condition": {
+				"StringEquals": {
+					"iam:AWSServiceName": [
+						"eks.amazonaws.com",
+						"eks-nodegroup.amazonaws.com",
+						"autoscaling.amazonaws.com"
+					]
+				}
+			}
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"eks:CreateAddon",
+				"eks:ListAddons",
+				"eks:DescribeCluster"
+			],
+			"Resource": "arn:aws:eks:us-west-2:948319129176:cluster/csf-cluster"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"eks:DescribeAddon",
+				"eks:UpdateAddon",
+				"eks:DeleteAddon",
+				"eks:DescribeUpdate",
+				"eks:ListTagsForResource"
+			],
+			"Resource": "arn:aws:eks:us-west-2:948319129176:addon/csf-cluster/*"
+		},
+		{
 			"Effect": "Allow",
 			"Action": [
 				"secretsmanager:CreateSecret",
@@ -203,48 +192,6 @@
 			"Resource": "arn:aws:secretsmanager:us-west-2:948319129176:secret:csf/db-url-*"
 		},
 		{
-			"Sid": "IamUpdateAssumeRolePolicy",
-			"Effect": "Allow",
-			"Action": "iam:UpdateAssumeRolePolicy",
-			"Resource": "arn:aws:iam::948319129176:role/csf-alb-controller-role"
-		},
-		{
-			"Effect": "Allow",
-			"Action": [
-				"iam:CreateRole",
-				"iam:GetRole",
-				"iam:UpdateAssumeRolePolicy",
-				"iam:AttachRolePolicy",
-				"iam:DetachRolePolicy",
-				"iam:PassRole",
-				"iam:ListOpenIDConnectProviders",
-				"iam:GetOpenIDConnectProvider"
-			],
-			"Resource": [
-				"arn:aws:iam::948319129176:role/csf-*"
-			]
-		},
-		{
-			"Sid": "EKSObservabilityInline",
-			"Effect": "Allow",
-			"Action": [
-				"iam:CreateRole",
-				"iam:DeleteRole",
-				"iam:GetRolePolicy",
-				"iam:PutRolePolicy",
-				"iam:DeleteRolePolicy",
-				"iam:AttachRolePolicy",
-				"iam:DetachRolePolicy",
-				"iam:TagRole",
-				"iam:PassRole"
-			],
-			"Resource": [
-				"arn:aws:iam::*:role/csf-cloudwatch-agent-role",
-				"arn:aws:iam::*:role/csf-fluent-bit-role"
-			]
-		},
-		{
-			"Sid": "AllowManageCWLogsForContainerInsights",
 			"Effect": "Allow",
 			"Action": [
 				"logs:CreateLogGroup",
@@ -254,40 +201,22 @@
 				"logs:DescribeLogGroups",
 				"logs:DeleteLogGroup"
 			],
+			"Resource": "arn:aws:logs:us-west-2:948319129176:log-group:/aws/containerinsights/*:*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": "logs:ListTagsForResource",
+			"Resource": "arn:aws:logs:us-west-2:948319129176:log-group:/aws/containerinsights/*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"iam:GetRolePolicy"
+			],
 			"Resource": [
-				"arn:aws:logs:us-west-2:948319129176:log-group:/aws/containerinsights/*",
-				"arn:aws:logs:us-west-2:948319129176:log-group::log-stream:"
+				"arn:aws:iam::948319129176:role/csf-cloudwatch-agent-role",
+				"arn:aws:iam::948319129176:role/csf-fluent-bit-role"
 			]
-		},
-		{
-			"Sid": "AllowManageRoute53",
-			"Effect": "Allow",
-			"Action": [
-				"route53:CreateHostedZone",
-				"route53:GetHostedZone",
-				"route53:ListHostedZones",
-				"route53:ListHostedZonesByName",
-				"route53:ChangeResourceRecordSets",
-				"route53:ListResourceRecordSets",
-				"route53:GetChange",
-				"route53:GetDNSSEC",
-				"route53:DeleteHostedZone",
-				"route53:ListTagsForResource"
-			],
-			"Resource": "*"
-		},
-		{
-			"Sid": "AllowManageCertificates",
-			"Effect": "Allow",
-			"Action": [
-				"acm:RequestCertificate",
-				"acm:DescribeCertificate",
-				"acm:ListCertificates",
-				"acm:DeleteCertificate",
-				"acm:AddTagsToCertificate",
-				"acm:ListTagsForCertificate"
-			],
-			"Resource": "*"
 		}
 	]
 }

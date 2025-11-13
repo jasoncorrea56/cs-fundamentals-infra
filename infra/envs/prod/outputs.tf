@@ -29,3 +29,8 @@ output "app_domain" {
   description = "Application FQDN"
   value       = var.app_domain
 }
+
+output "github_actions_role_arn" {
+  value       = aws_iam_role.gha_deployer.arn
+  description = "IAM role ARN that GitHub Actions assumes (set as AWS_ROLE_TO_ASSUME)."
+}

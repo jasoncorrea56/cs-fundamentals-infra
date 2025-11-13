@@ -1,10 +1,21 @@
 # Helm install (official autoscaler helm repo)
 resource "helm_release" "cluster_autoscaler" {
   name       = "cluster-autoscaler"
-  namespace  = var.namespace
   repository = "https://kubernetes.github.io/autoscaler"
   chart      = "cluster-autoscaler"
   version    = var.chart_version
+
+  namespace        = var.namespace
+  create_namespace = true
+
+  values = [
+    yamlencode({
+      image = {
+        repository = "registry.k8s.io/autoscaling/cluster-autoscaler"
+        tag        = "v1.34.0"
+      }
+    })
+  ]
 
   # Create SA and annotate with the IRSA role
   set {

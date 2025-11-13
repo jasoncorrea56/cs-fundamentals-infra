@@ -17,12 +17,13 @@ module "vpc" {
 }
 
 module "eks" {
-  source           = "../../modules/eks"
-  cluster_name     = "csf-cluster"
-  public_subnets   = module.vpc.public_subnets
-  private_subnets  = module.vpc.private_subnets
-  cluster_role_arn = aws_iam_role.eks_cluster.arn
-  node_role_arn    = aws_iam_role.eks_node.arn
+  source             = "../../modules/eks"
+  cluster_name       = "csf-cluster"
+  kubernetes_version = var.kubernetes_version
+  public_subnets     = module.vpc.public_subnets
+  private_subnets    = module.vpc.private_subnets
+  cluster_role_arn   = aws_iam_role.eks_cluster.arn
+  node_role_arn      = aws_iam_role.eks_node.arn
 }
 
 module "irsa" {
@@ -55,15 +56,20 @@ module "externaldns_irsa" {
   source            = "../../modules/externaldns_irsa"
   cluster_name      = module.eks.cluster_name
   oidc_provider_arn = module.irsa.oidc_provider_arn
+  namespace         = "kube-system"
+  sa_name           = "external-dns"
+  role_name         = "csf-externaldns-role"
 }
 
 module "externaldns_chart" {
   source          = "../../modules/externaldns_chart"
   cluster_name    = module.eks.cluster_name
+  namespace       = "kube-system"
+  sa_name         = "external-dns"
   role_arn        = module.externaldns_irsa.role_arn
   owner_id        = module.eks.cluster_name
   domain_filters  = [module.route53_zone.zone_name]
-  zone_id_filters = [var.hosted_zone_id]
+  zone_id_filters = [module.route53_zone.zone_id]
 }
 
 module "db_secret" {
@@ -160,17 +166,22 @@ module "aws_for_fluent_bit_chart" {
 }
 
 module "acm_csf" {
-  source            = "../../modules/acm_cert"
-  domain_name       = var.app_domain
-  enable_validation = false
+  source = "../../modules/acm_cert"
+
+  # App subdomain (csf.example-domain.com)
+  domain_name = var.app_domain
+
+  # Root domain (example-domain.com)
+  subject_alternative_names = [var.zone_name]
+
+  enable_validation = true
   hosted_zone_id    = module.route53_zone.zone_id
   region            = "us-west-2"
-  # subject_alternative_names = ["www.${var.app_domain}"] # Optional
 }
 
 module "route53_zone" {
   source    = "../../modules/route53_zone"
-  zone_name = var.zone_name # "jasoncorrea.com"
+  zone_name = var.zone_name
 }
 
 module "security_policies" {
@@ -198,5 +209,36 @@ module "security_policies" {
     module.eks,
     module.alb_controller_chart,
     module.externaldns_chart
+  ]
+}
+
+module "metrics_server_chart" {
+  source = "../../modules/metrics_server_chart"
+}
+
+module "app_chart" {
+  source = "../../modules/app_chart"
+
+  chart_path  = abspath("${path.module}/../../../../cs-fundamentals/helm")
+  values_file = abspath("${path.module}/../../../../cs-fundamentals/helm/values-prod.yaml")
+
+  acm_certificate_arn = module.acm_csf.certificate_arn
+  namespace           = "csf"
+  release_name        = "csf"
+
+  ingress_hosts = [
+    var.app_domain, # csf.example-domain.com
+  ]
+
+  # Optional: override image tag/repo at apply-time without touching values files
+  image_overrides = [
+    # { name = "image.repository", value = "948319129176.dkr.ecr.us-west-2.amazonaws.com/cs-fundamentals" },
+    # { name = "image.tag",        value = "v0.2.5" },
+  ]
+
+  depends_on = [
+    module.irsa_db,
+    module.secret_sync,
+    module.metrics_server_chart
   ]
 }
