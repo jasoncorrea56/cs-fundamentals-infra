@@ -15,6 +15,19 @@ resource "helm_release" "app" {
     file(var.values_file)
   ]
 
+  # 🔒 Disable CSI Secrets Store at the chart level (avoid mounting secrets-store.csi.k8s.io)
+  set {
+    name  = "secretsStore.enabled"
+    value = "false"
+  }
+
+  # 🔒 Also ensure the chart doesn't try to manage its own K8s Secret
+  # (we already have csf-db managed separately)
+  set {
+    name  = "secret.enabled"
+    value = "false"
+  }
+
   # Existing image overrides passthrough
   dynamic "set" {
     for_each = var.image_overrides

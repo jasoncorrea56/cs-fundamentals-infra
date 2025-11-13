@@ -19,6 +19,7 @@ resource "aws_eks_node_group" "default" {
   version         = var.kubernetes_version
   ami_type        = "AL2023_x86_64_STANDARD"
   instance_types  = ["t3.medium"]
+  capacity_type   = "SPOT"
 
   scaling_config {
     desired_size = 2

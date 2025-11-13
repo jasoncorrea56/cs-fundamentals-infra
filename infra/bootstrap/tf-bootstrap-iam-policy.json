@@ -103,27 +103,7 @@
 				"eks:DescribeAddonVersions",
 				"elasticloadbalancing:DescribeLoadBalancers",
 				"elasticloadbalancing:DescribeLoadBalancerAttributes",
-				"elasticloadbalancing:DescribeTags"
-			],
-			"Resource": "*"
-		},
-		{
-			"Effect": "Allow",
-			"Action": "iam:CreateServiceLinkedRole",
-			"Resource": "*",
-			"Condition": {
-				"StringEquals": {
-					"iam:AWSServiceName": [
-						"eks.amazonaws.com",
-						"eks-nodegroup.amazonaws.com",
-						"autoscaling.amazonaws.com"
-					]
-				}
-			}
-		},
-		{
-			"Effect": "Allow",
-			"Action": [
+				"elasticloadbalancing:DescribeTags",
 				"iam:CreateRole",
 				"iam:DeleteRole",
 				"iam:GetRole",
@@ -152,9 +132,28 @@
 				"iam:GetOpenIDConnectProvider",
 				"iam:ListOpenIDConnectProviders",
 				"iam:UpdateOpenIDConnectProviderThumbprint",
-				"iam:UpdateAssumeRolePolicy"
+				"iam:UpdateAssumeRolePolicy",
+				"logs:DescribeLogGroups",
+				"logs:DescribeLogStreams",
+				"logs:ListTagsForResource",
+				"logs:PutRetentionPolicy",
+				"logs:CreateLogGroup"
 			],
 			"Resource": "*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": "iam:CreateServiceLinkedRole",
+			"Resource": "*",
+			"Condition": {
+				"StringEquals": {
+					"iam:AWSServiceName": [
+						"eks.amazonaws.com",
+						"eks-nodegroup.amazonaws.com",
+						"autoscaling.amazonaws.com"
+					]
+				}
+			}
 		},
 		{
 			"Effect": "Allow",
@@ -208,14 +207,6 @@
 			"Effect": "Allow",
 			"Action": "logs:ListTagsForResource",
 			"Resource": "arn:aws:logs:us-west-2:948319129176:log-group:/aws/containerinsights/*"
-		},
-		{
-			"Effect": "Allow",
-			"Action": [
-				"logs:DescribeLogGroups",
-				"logs:DescribeLogStreams"
-			],
-			"Resource": "*"
 		},
 		{
 			"Effect": "Allow",
