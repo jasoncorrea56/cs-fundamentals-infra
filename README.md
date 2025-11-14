@@ -29,6 +29,23 @@ All resources are defined using Terraform, with no manual console configuration 
 - AWS CLI configured locally
 - An S3 backend + DynamoDB lock table for remote state management
 
+### Create IAM `tf-bootstrap` User
+
+- Create an IAM User: `tf-bootstrap`
+- Create an IAM Policy: `TfBootstrapS3Dynamo`
+  - Grant S3 & DynamoDB access using the policy contained in `infra/bootstrap/tf-bootstrap-iam-policy.json`
+
+### GitHub Repository
+
+Set Repository Variables:
+
+- AWS_ROLE_TO_ASSUME=tf-bootstrap
+- AWS_REGION=us-west-2
+- EKS_CLUSTER_NAME = csf-cluster
+- ECR_REGISTRY=<AWS_ACCOUNT>.dkr.ecr.us-west-2.amazonaws.com/cs-fundamentals
+- APP_DOMAIN=csf.example-domain.com
+- ACM_CERT_ARN=<ACM Certificate ARN returned from `terraform apply`>
+
 ## Workflow
 
 1. Update Terraform configuration
@@ -45,12 +62,6 @@ All resources are defined using Terraform, with no manual console configuration 
 ## State Management
 
 Store Terraform state remotely using S3 (for remote state) + DynamoDB (for locking) to prevent local drift and enable safe collaboration.
-
-### Create IAM tf-bootstrap User
-
-- Create an IAM User: `tf-bootstrap`
-- Create an IAM Policy: `TfBootstrapS3Dynamo`
-  - Grant S3 & DynamoDB access using the policy contained in `infra/bootstrap/tf-bootstrap-iam-policy.json`
 
 ### Configure AWS Credentials
 
