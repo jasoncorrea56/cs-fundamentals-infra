@@ -93,11 +93,11 @@ resource "kubernetes_manifest" "github_deployer_clusterrole" {
     kind       = "ClusterRole"
     metadata   = { name = "github-deployer" }
     rules = [
-      # --- Read-only for troubleshooting ---
+      # --- Pod-level access (read + ephemeral curl pods for smoke tests) ---
       {
         apiGroups = [""]
         resources = ["pods", "pods/log", "endpoints", "namespaces"]
-        verbs     = ["get", "list", "watch"]
+        verbs     = ["get", "list", "watch", "create", "delete"]
       },
 
       # --- Core objects Helm creates/updates in your chart ---

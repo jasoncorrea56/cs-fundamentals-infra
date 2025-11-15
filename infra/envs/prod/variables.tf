@@ -70,3 +70,16 @@ variable "alb_zone_id" {
   type        = string
   default     = ""
 }
+
+variable "enable_runtime_alerts" {
+  description = "Enable runtime CloudWatch alarms that depend on the ALB existing (5xx, latency, etc)."
+  type        = bool
+  default     = false
+}
+
+# infra/envs/prod/variables.tf
+variable "runtime_alert_email" {
+  description = "Optional email address for receiving runtime alerts via SNS."
+  type        = string
+  default     = ""
+}

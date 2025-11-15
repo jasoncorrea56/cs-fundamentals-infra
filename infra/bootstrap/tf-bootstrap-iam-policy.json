@@ -137,7 +137,20 @@
 				"logs:DescribeLogStreams",
 				"logs:ListTagsForResource",
 				"logs:PutRetentionPolicy",
-				"logs:CreateLogGroup"
+				"logs:CreateLogGroup",
+				"cloudwatch:DescribeAlarms",
+				"cloudwatch:ListTagsForResource",
+				"cloudwatch:PutMetricAlarm",
+				"cloudwatch:DeleteAlarms",
+				"cloudwatch:TagResource",
+				"SNS:CreateTopic",
+				"SNS:SetTopicAttributes",
+				"SNS:GetTopicAttributes",
+				"SNS:ListTagsForResource",
+				"SNS:DeleteTopic",
+				"SNS:Subscribe",
+				"SNS:Unsubscribe",
+				"SNS:GetSubscriptionAttributes"
 			],
 			"Resource": "*"
 		},
@@ -205,7 +218,9 @@
 		},
 		{
 			"Effect": "Allow",
-			"Action": "logs:ListTagsForResource",
+			"Action": [
+				"logs:ListTagsForResource"
+			],
 			"Resource": "arn:aws:logs:us-west-2:948319129176:log-group:/aws/containerinsights/*"
 		},
 		{
