@@ -69,12 +69,12 @@ resource "kubernetes_manifest" "rb_view_sa" {
     apiVersion = "rbac.authorization.k8s.io/v1"
     kind       = "RoleBinding"
     metadata = {
-      name      = "viewer-csf-app"
+      name      = "viewer-${var.namespace}-app"
       namespace = var.namespace
     }
     subjects = [{
       kind      = "ServiceAccount"
-      name      = "csf-app"
+      name      = var.service_account
       namespace = var.namespace
     }]
     roleRef = {

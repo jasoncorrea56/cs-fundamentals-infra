@@ -20,7 +20,7 @@ resource "kubernetes_manifest" "spc" {
       parameters = {
         objects = yamlencode([
           {
-            objectName = "arn:aws:secretsmanager:us-west-2:948319129176:secret:csf/db-url-GUR3Uh"
+            objectName = var.secret_arn
             objectType = "secretsmanager"
             region     = var.region
             jmesPath   = [{ path = "db_url", objectAlias = "db_url" }]

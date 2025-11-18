@@ -22,7 +22,7 @@ resource "aws_eks_node_group" "default" {
   capacity_type   = "SPOT"
 
   scaling_config {
-    desired_size = 2
+    desired_size = 3
     max_size     = 4
     min_size     = 1
   }
@@ -32,8 +32,8 @@ resource "aws_eks_node_group" "default" {
   }
 
   tags = {
-    Name                                    = "${var.cluster_name}-ng"
-    "k8s.io/cluster-autoscaler/enabled"     = "true"
-    "k8s.io/cluster-autoscaler/csf-cluster" = "owned"
+    Name                                            = "${var.cluster_name}-ng"
+    "k8s.io/cluster-autoscaler/enabled"             = "true"
+    "k8s.io/cluster-autoscaler/${var.cluster_name}" = "owned"
   }
 }

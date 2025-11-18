@@ -1,24 +1,36 @@
 locals {
-  app_ns = "csf"
-  app_sa = "csf-app" # ServiceAccount
+  # Logical environment name (dev, prod, etc.)
+  environment = var.environment
+
+  # Application name, namespace & service account
+  app_name = var.app_name
+  app_ns = var.app_namespace
+  app_sa = var.service_account
+
+  # Effective cluster name:
+  # - For existing prod: terraform.tfvars sets cluster_name,
+  #   so we keep that to avoid renaming any resources.
+  # - For new envs (dev, qa, etc.): if cluster_name is unset,
+  #   we default to "<namespace>-<environment>-cluster".
+  cluster_name = coalesce(var.cluster_name, "${var.app_namespace}-${var.environment}-cluster")
 }
 
 module "ecr_csf" {
   source = "../../modules/ecr"
-  name   = "cs-fundamentals"
+  name   = local.app_name
 }
 
 module "vpc" {
   source       = "../../modules/vpc"
-  name         = "csf"
+  name         = local.app_ns
   cidr_block   = "10.0.0.0/16"
-  cluster_name = "csf-cluster"
+  cluster_name = local.cluster_name
   azs          = ["us-west-2a", "us-west-2b"]
 }
 
 module "eks" {
   source             = "../../modules/eks"
-  cluster_name       = "csf-cluster"
+  cluster_name       = local.cluster_name
   kubernetes_version = var.kubernetes_version
   public_subnets     = module.vpc.public_subnets
   private_subnets    = module.vpc.private_subnets
@@ -29,19 +41,23 @@ module "eks" {
 module "irsa" {
   source       = "../../modules/irsa"
   cluster_name = module.eks.cluster_name
+
+  depends_on = [module.eks]
 }
 
 module "alb_irsa" {
   source            = "../../modules/alb_irsa"
   cluster_name      = module.eks.cluster_name
   oidc_provider_arn = module.irsa.oidc_provider_arn
-  role_name         = "csf-alb-controller-role"
+  role_name         = "${local.app_ns}-alb-controller-role"
+
+  depends_on = [module.eks]
 }
 
 module "alb_controller_policy" {
   source      = "../../modules/alb_controller_policy"
   policy_name = "AWSLoadBalancerControllerIAMPolicy-Custom"
-  role_name   = "csf-alb-controller-role"
+  role_name   = "${local.app_ns}-alb-controller-role"
 }
 
 module "alb_controller_chart" {
@@ -58,7 +74,9 @@ module "externaldns_irsa" {
   oidc_provider_arn = module.irsa.oidc_provider_arn
   namespace         = "kube-system"
   sa_name           = "external-dns"
-  role_name         = "csf-externaldns-role"
+  role_name         = "${local.app_ns}-externaldns-role"
+
+  depends_on = [module.eks]
 }
 
 module "externaldns_chart" {
@@ -74,7 +92,7 @@ module "externaldns_chart" {
 
 module "db_secret" {
   source = "../../modules/asm_secret"
-  name   = "csf/db-url"
+  name   = "${local.app_ns}/db-url"
   db_url = var.db_url
 }
 
@@ -84,8 +102,10 @@ module "irsa_db" {
   oidc_provider_arn = module.irsa.oidc_provider_arn
   namespace         = local.app_ns
   service_account   = local.app_sa
-  role_name         = "csf-app-secrets-role"
+  role_name         = "${local.app_ns}-app-secrets-role"
   secret_arn        = module.db_secret.arn
+
+  depends_on = [module.eks]
 }
 
 module "csi_driver" {
@@ -101,9 +121,9 @@ module "secret_sync" {
   namespace       = local.app_ns
   app_sa          = local.app_sa
   role_arn        = module.irsa_db.role_arn
-  spc_name        = "csf-db-spc"
-  secret_name     = "csf/db-url"
-  k8s_secret_name = "csf-db"
+  spc_name        = "${local.app_ns}-db-spc"
+  secret_arn      = module.db_secret.arn
+  k8s_secret_name = "${local.app_ns}-db"
   region          = "us-west-2"
 
   depends_on = [
@@ -118,7 +138,9 @@ module "cluster_autoscaler_irsa" {
   oidc_provider_arn = module.irsa.oidc_provider_arn
   namespace         = "kube-system"
   service_account   = "cluster-autoscaler-aws-cluster-autoscaler"
-  role_name         = "csf-cluster-autoscaler-role"
+  role_name         = "${module.eks.cluster_name}-autoscaler-role"
+
+  depends_on = [module.eks]
 }
 
 module "cluster_autoscaler" {
@@ -135,7 +157,9 @@ module "cloudwatch_irsa_agent" {
   oidc_provider_arn = module.irsa.oidc_provider_arn
   namespace         = "amazon-cloudwatch"
   service_account   = "cloudwatch-agent"
-  role_name         = "csf-cloudwatch-agent-role"
+  role_name         = "${local.app_ns}-cloudwatch-agent-role"
+
+  depends_on = [module.eks]
 }
 
 module "fluentbit_irsa" {
@@ -144,7 +168,9 @@ module "fluentbit_irsa" {
   oidc_provider_arn = module.irsa.oidc_provider_arn
   namespace         = "amazon-cloudwatch"
   service_account   = "aws-for-fluent-bit"
-  role_name         = "csf-fluent-bit-role"
+  role_name         = "${local.app_ns}-fluent-bit-role"
+
+  depends_on = [module.eks]
 }
 
 module "cloudwatch_agent_chart" {
@@ -153,6 +179,7 @@ module "cloudwatch_agent_chart" {
   region       = "us-west-2"
   role_arn     = module.cloudwatch_irsa_agent.role_arn
   # chart_version = "x.y.z"
+
   depends_on = [module.irsa]
 }
 
@@ -162,6 +189,7 @@ module "aws_for_fluent_bit_chart" {
   region       = "us-west-2"
   role_arn     = module.fluentbit_irsa.role_arn
   # chart_version = "x.y.z"
+
   depends_on = [module.irsa]
 }
 
@@ -185,14 +213,15 @@ module "route53_zone" {
 }
 
 module "security_policies" {
-  source        = "../../modules/security_policies"
-  namespace     = local.app_ns
-  app_port      = 8080
-  ingress_cidrs = [module.vpc.cidr_block]
+  source          = "../../modules/security_policies"
+  namespace       = local.app_ns
+  service_account = var.service_account
+  app_port        = 8080
+  ingress_cidrs   = [module.vpc.cidr_block]
 
   app_selector = {
     key   = "app.kubernetes.io/name"
-    value = "cs-fundamentals"
+    value = local.app_name
   }
 
   allow_db_egress = {
@@ -219,26 +248,26 @@ module "metrics_server_chart" {
 module "app_chart" {
   source = "../../modules/app_chart"
 
-  chart_path  = abspath("${path.module}/../../../../cs-fundamentals/helm")
-  values_file = abspath("${path.module}/../../../../cs-fundamentals/helm/values-prod.yaml")
+  chart_path  = abspath("${path.module}/../../../../${local.app_name}/helm")
+  values_file = abspath("${path.module}/../../../../${local.app_name}/helm/values-prod.yaml")
 
   acm_certificate_arn = module.acm_csf.certificate_arn
-  namespace           = "csf"
-  release_name        = "csf"
+  namespace           = local.app_ns
+  release_name        = local.app_ns
 
   ingress_hosts = [
-    var.app_domain, # csf.example-domain.com
+    var.app_domain,
   ]
 
   # Optional: override image tag/repo at apply-time without touching values files
   image_overrides = [
-    # { name = "image.repository", value = "948319129176.dkr.ecr.us-west-2.amazonaws.com/cs-fundamentals" },
+    # { name = "image.repository", value = "948319129176.dkr.ecr.us-west-2.amazonaws.com/${local.app_name}" },
     # { name = "image.tag",        value = "v0.2.5" },
   ]
 
   depends_on = [
     module.irsa_db,
     module.secret_sync,
-    module.metrics_server_chart
+    module.metrics_server_chart,
   ]
 }

@@ -60,6 +60,11 @@ resource "aws_iam_role_policy_attachment" "node_ecr_ro" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
 
+resource "aws_iam_role_policy_attachment" "node_ssm" {
+  role       = aws_iam_role.eks_node.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
 # --- GitHub OIDC provider (GHA -> AWS) --- #
 resource "aws_iam_openid_connect_provider" "github" {
   url             = "https://token.actions.githubusercontent.com"

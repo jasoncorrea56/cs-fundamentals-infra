@@ -1,7 +1,7 @@
 variable "environment" {
   description = "Environment name (e.g., dev, prod, qa)"
   type        = string
-  default     = "prod"
+  default     = "dev"
 }
 
 variable "app_name" {
@@ -59,15 +59,15 @@ variable "cluster_name" {
 }
 
 variable "eks_cluster_role_name" {
-  description = "IAM role name for the EKS control plane (prod keeps existing name)."
+  description = "IAM role name for the EKS control plane (dev)."
   type        = string
-  default     = "csf-eks-cluster-role"
+  default     = "csf-dev-eks-cluster-role"
 }
 
 variable "eks_node_role_name" {
-  description = "IAM role name for the EKS node group (prod keeps existing name)."
+  description = "IAM role name for the EKS node group (dev)."
   type        = string
-  default     = "csf-eks-node-role"
+  default     = "csf-dev-eks-node-role"
 }
 
 variable "kubernetes_version" {
