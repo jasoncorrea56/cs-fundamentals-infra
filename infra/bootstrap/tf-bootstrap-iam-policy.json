@@ -157,7 +157,8 @@
 				"SNS:DeleteTopic",
 				"SNS:Subscribe",
 				"SNS:Unsubscribe",
-				"SNS:GetSubscriptionAttributes"
+				"SNS:GetSubscriptionAttributes",
+				"secretsmanager:ListSecrets"
 			],
 			"Resource": "*"
 		},
@@ -238,6 +239,21 @@
 			"Resource": [
 				"arn:aws:iam::948319129176:role/csf-cloudwatch-agent-role",
 				"arn:aws:iam::948319129176:role/csf-fluent-bit-role"
+			]
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"secretsmanager:CreateSecret",
+				"secretsmanager:DeleteSecret",
+				"secretsmanager:DescribeSecret",
+				"secretsmanager:GetResourcePolicy",
+				"secretsmanager:GetSecretValue",
+				"secretsmanager:PutSecretValue",
+				"secretsmanager:RestoreSecret"
+			],
+			"Resource": [
+				"arn:aws:secretsmanager:us-west-2:948319129176:secret:csf/*"
 			]
 		}
 	]

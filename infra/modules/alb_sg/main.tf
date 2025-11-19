@@ -26,7 +26,7 @@ resource "aws_security_group" "this" {
   }
 
   tags = {
-    Name        = "${var.name_prefix}-sg"
-    Component   = "alb"
+    Name      = "${var.name_prefix}-sg"
+    Component = "alb"
   }
 }

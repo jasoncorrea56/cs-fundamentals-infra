@@ -34,6 +34,8 @@ module "alb_sg" {
   name_prefix   = "${local.app_ns}-${local.environment}-alb"
   vpc_id        = module.vpc.vpc_id
   allowed_cidrs = var.alb_allowed_cidrs
+
+  depends_on = [module.vpc]
 }
 
 module "eks" {
@@ -44,6 +46,8 @@ module "eks" {
   private_subnets    = module.vpc.private_subnets
   cluster_role_arn   = aws_iam_role.eks_cluster.arn
   node_role_arn      = aws_iam_role.eks_node.arn
+
+  depends_on = [module.vpc]
 }
 
 module "irsa" {
@@ -59,7 +63,10 @@ module "alb_irsa" {
   oidc_provider_arn = module.irsa.oidc_provider_arn
   role_name         = "${local.app_ns}-${local.environment}-alb-controller-role"
 
-  depends_on = [module.eks]
+  depends_on = [
+    module.eks,
+    module.irsa,
+  ]
 }
 
 module "alb_controller_policy" {
@@ -89,7 +96,10 @@ module "externaldns_irsa" {
   sa_name           = "external-dns"
   role_name         = "${local.app_ns}-${local.environment}-externaldns-role"
 
-  depends_on = [module.eks]
+  depends_on = [
+    module.eks,
+    module.irsa,
+  ]
 }
 
 module "externaldns_chart" {
@@ -103,17 +113,20 @@ module "externaldns_chart" {
   owner_id        = module.eks.cluster_name
   domain_filters  = [data.aws_route53_zone.shared_hosted_zone.name]
   zone_id_filters = [data.aws_route53_zone.shared_hosted_zone.zone_id]
+
+  depends_on = [
+    module.eks,
+    module.externaldns_irsa,
+  ]
 }
 
-# TODO UNDO
-data "aws_secretsmanager_secret" "db_url" {
-  name = "${local.app_ns}/db-url"
+module "db_secret" {
+  source = "../../modules/asm_secret"
+
+  # Per-env secret name (i.e. csf/dev/db-url)
+  name   = "${local.app_ns}/${local.environment}/db-url"
+  db_url = var.db_url
 }
-# module "db_secret" {
-#   source = "../../modules/asm_secret"
-#   name   = "${local.app_ns}/db-url"
-#   db_url = var.db_url
-# }
 
 module "irsa_db" {
   source            = "../../modules/irsa_secrets"
@@ -122,9 +135,13 @@ module "irsa_db" {
   namespace         = local.app_ns
   service_account   = local.app_sa
   role_name         = "${local.app_ns}-${local.environment}-app-secrets-role"
-  secret_arn        = data.aws_secretsmanager_secret.db_url.arn
+  secret_arn        = module.db_secret.secret_arn
 
-  depends_on = [module.eks]
+  depends_on = [
+    module.db_secret,
+    module.eks,
+    module.irsa,
+  ]
 }
 
 module "csi_driver" {
@@ -141,13 +158,15 @@ module "secret_sync" {
   app_sa          = local.app_sa
   role_arn        = module.irsa_db.role_arn
   spc_name        = "${local.app_ns}-db-spc"
-  secret_arn      = data.aws_secretsmanager_secret.db_url.arn
+  secret_arn      = module.db_secret.secret_arn
   k8s_secret_name = "${local.app_ns}-db"
   region          = "us-west-2"
 
   depends_on = [
+    module.csi_aws_provider,
     module.csi_driver,
-    module.csi_aws_provider
+    module.db_secret,
+    module.irsa,
   ]
 }
 
@@ -159,7 +178,10 @@ module "secret_sync" {
 #   service_account   = "cluster-autoscaler-aws-cluster-autoscaler"
 #   role_name         = "${module.eks.cluster_name}-autoscaler-role"
 
-#   depends_on = [module.eks]
+#   depends_on = [
+#     module.eks,
+#     module.irsa,
+#   ]
 # }
 
 # module "cluster_autoscaler" {
@@ -168,6 +190,10 @@ module "secret_sync" {
 #   region       = "us-west-2"
 #   role_arn     = module.cluster_autoscaler_irsa.role_arn
 #   # chart_version   = "9.45.0" # Optional pin
+#   depends_on = [
+#     module.cluster_autoscaler_irsa,
+#     module.eks,
+#   ]
 # }
 
 # module "cloudwatch_irsa_agent" {
@@ -178,7 +204,10 @@ module "secret_sync" {
 #   service_account   = "cloudwatch-agent"
 #   role_name         = "${local.app_ns}-cloudwatch-agent-role"
 
-#   depends_on = [module.eks]
+#   depends_on = [
+#     module.eks,
+#     module.irsa,
+#   ]
 # }
 
 module "fluentbit_irsa" {
@@ -189,7 +218,10 @@ module "fluentbit_irsa" {
   service_account   = "aws-for-fluent-bit"
   role_name         = "${local.app_ns}-${local.environment}-fluent-bit-role"
 
-  depends_on = [module.eks]
+  depends_on = [
+    module.eks,
+    module.irsa,
+  ]
 }
 
 # module "cloudwatch_agent_chart" {
@@ -199,7 +231,10 @@ module "fluentbit_irsa" {
 #   role_arn     = module.cloudwatch_irsa_agent.role_arn
 #   # chart_version = "x.y.z"
 
-#   depends_on = [module.irsa]
+#   depends_on = [
+#     module.eks,
+#     module.irsa,
+#   ]
 # }
 
 # module "aws_for_fluent_bit_chart" {
@@ -209,7 +244,10 @@ module "fluentbit_irsa" {
 #   role_arn     = module.fluentbit_irsa.role_arn
 #   # chart_version = "x.y.z"
 
-#   depends_on = [module.irsa]
+#   depends_on = [
+#     module.eks,
+#     module.irsa,
+#   ]
 # }
 
 # module "security_policies" {
@@ -237,7 +275,8 @@ module "fluentbit_irsa" {
 #   depends_on = [
 #     module.eks,
 #     module.alb_controller_chart,
-#     module.externaldns_chart
+#     module.externaldns_chart,
+#     module.vpc,
 #   ]
 # }
 
@@ -269,7 +308,7 @@ module "metrics_server_chart" {
 
 #   depends_on = [
 #     module.irsa_db,
-#     module.secret_sync,
 #     module.metrics_server_chart,
+#     module.secret_sync,
 #   ]
 # }
