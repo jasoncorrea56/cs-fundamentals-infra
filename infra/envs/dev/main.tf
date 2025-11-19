@@ -170,31 +170,32 @@ module "secret_sync" {
   ]
 }
 
-# module "cluster_autoscaler_irsa" {
-#   source            = "../../modules/cluster_autoscaler_irsa"
-#   cluster_name      = module.eks.cluster_name
-#   oidc_provider_arn = module.irsa.oidc_provider_arn
-#   namespace         = "kube-system"
-#   service_account   = "cluster-autoscaler-aws-cluster-autoscaler"
-#   role_name         = "${module.eks.cluster_name}-autoscaler-role"
+module "cluster_autoscaler_irsa" {
+  source            = "../../modules/cluster_autoscaler_irsa"
+  cluster_name      = module.eks.cluster_name
+  oidc_provider_arn = module.irsa.oidc_provider_arn
+  namespace         = "kube-system"
+  service_account   = "cluster-autoscaler-aws-cluster-autoscaler"
+  role_name         = "${module.eks.cluster_name}-autoscaler-role"
 
-#   depends_on = [
-#     module.eks,
-#     module.irsa,
-#   ]
-# }
+  depends_on = [
+    module.eks,
+    module.irsa,
+  ]
+}
 
-# module "cluster_autoscaler" {
-#   source       = "../../modules/cluster_autoscaler_chart"
-#   cluster_name = module.eks.cluster_name
-#   region       = "us-west-2"
-#   role_arn     = module.cluster_autoscaler_irsa.role_arn
-#   # chart_version   = "9.45.0" # Optional pin
-#   depends_on = [
-#     module.cluster_autoscaler_irsa,
-#     module.eks,
-#   ]
-# }
+module "cluster_autoscaler" {
+  source       = "../../modules/cluster_autoscaler_chart"
+  cluster_name = module.eks.cluster_name
+  region       = "us-west-2"
+  role_arn     = module.cluster_autoscaler_irsa.role_arn
+  # chart_version   = "9.45.0" # Optional pin
+
+  depends_on = [
+    module.cluster_autoscaler_irsa,
+    module.eks,
+  ]
+}
 
 # module "cloudwatch_irsa_agent" {
 #   source            = "../../modules/cloudwatch_irsa_agent"
@@ -250,35 +251,35 @@ module "fluentbit_irsa" {
 #   ]
 # }
 
-# module "security_policies" {
-#   source          = "../../modules/security_policies"
-#   namespace       = local.app_ns
-#   service_account = var.service_account
-#   app_port        = 8080
-#   ingress_cidrs   = [module.vpc.cidr_block]
+module "security_policies" {
+  source          = "../../modules/security_policies"
+  namespace       = local.app_ns
+  service_account = var.service_account
+  app_port        = 8080
+  ingress_cidrs   = [module.vpc.cidr_block]
 
-#   app_selector = {
-#     key   = "app.kubernetes.io/name"
-#     value = local.app_name
-#   }
+  app_selector = {
+    key   = "app.kubernetes.io/name"
+    value = local.app_name
+  }
 
-#   allow_db_egress = {
-#     enabled = true
-#     cidrs   = [module.vpc.cidr_block]
-#     ports   = [5432]
-#   }
+  allow_db_egress = {
+    enabled = true
+    cidrs   = [module.vpc.cidr_block]
+    ports   = [5432]
+  }
 
-#   allow_https_egress = {
-#     enabled = true
-#   }
+  allow_https_egress = {
+    enabled = true
+  }
 
-#   depends_on = [
-#     module.eks,
-#     module.alb_controller_chart,
-#     module.externaldns_chart,
-#     module.vpc,
-#   ]
-# }
+  depends_on = [
+    module.eks,
+    module.alb_controller_chart,
+    module.externaldns_chart,
+    module.vpc,
+  ]
+}
 
 module "metrics_server_chart" {
   source = "../../modules/metrics_server_chart"
