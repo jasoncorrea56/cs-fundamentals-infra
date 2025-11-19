@@ -1,18 +1,18 @@
 locals {
-  # Logical environment name (dev, prod, etc.)
+  # Logical environment name (dev, qa, prod, etc.)
   environment = var.environment
 
-  # Application name, namespace & service account
+  # App and k8s config
   app_name = var.app_name
   app_ns   = var.app_namespace
   app_sa   = var.service_account
 
-  # Effective cluster name:
-  # - For existing prod: terraform.tfvars sets cluster_name,
-  #   so we keep that to avoid renaming any resources.
-  # - For new envs (dev, qa, etc.): if cluster_name is unset,
-  #   we default to "<namespace>-<environment>-cluster".
+  # Cluster name: "<namespace>-<env>-cluster"
   cluster_name = coalesce(var.cluster_name, "${var.app_namespace}-${var.environment}-cluster")
+
+  # DNS
+  subdomain_prefix = "${local.app_ns}-${local.environment}"       # "csf-dev", "csf-qa", ...
+  app_domain       = "${local.subdomain_prefix}.${var.zone_name}" # "csf-dev.jasoncorrea.dev"
 }
 
 # Dev uses the existing public hosted zone (created and managed by prod).
@@ -27,6 +27,13 @@ module "vpc" {
   cidr_block   = "10.0.0.0/16"
   cluster_name = local.cluster_name
   azs          = ["us-west-2a", "us-west-2b"]
+}
+
+module "alb_sg" {
+  source        = "../../modules/alb_sg"
+  name_prefix   = "${local.app_ns}-${local.environment}-alb"
+  vpc_id        = module.vpc.vpc_id
+  allowed_cidrs = var.alb_allowed_cidrs
 }
 
 module "eks" {

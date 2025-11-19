@@ -15,7 +15,7 @@ variable "app_namespace" {
 }
 
 variable "app_domain" {
-  description = "FQDN for the app (i.e. csf.example-domain.com)"
+  description = "FQDN for the app (i.e. csf.jasoncorrea.dev)"
   type        = string
 }
 
@@ -47,7 +47,7 @@ variable "db_url" {
 }
 
 variable "zone_name" {
-  description = "Hosted zone name (i.e. example-domain.com.)"
+  description = "Hosted zone name (i.e. jasoncorrea.dev.)"
   type        = string
   default     = null
 }

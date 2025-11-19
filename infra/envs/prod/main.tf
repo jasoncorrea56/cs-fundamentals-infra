@@ -196,10 +196,10 @@ module "aws_for_fluent_bit_chart" {
 module "acm_csf" {
   source = "../../modules/acm_cert"
 
-  # App subdomain (csf.example-domain.com)
+  # App subdomain (csf.jasoncorrea.dev)
   domain_name = var.app_domain
 
-  # Root domain (example-domain.com)
+  # Root domain (jasoncorrea.dev)
   subject_alternative_names = [var.zone_name]
 
   enable_validation = true

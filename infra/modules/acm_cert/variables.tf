@@ -1,5 +1,5 @@
 variable "domain_name" {
-  description = "Primary FQDN (i.e. csf.example-domain.com)"
+  description = "Primary FQDN (i.e. csf.jasoncorrea.dev)"
   type        = string
 }
 

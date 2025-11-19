@@ -14,11 +14,6 @@ variable "app_namespace" {
   type        = string
 }
 
-variable "app_domain" {
-  description = "FQDN for the app (i.e. csf.example-domain.com)"
-  type        = string
-}
-
 variable "github_repo" {
   description = "Github repo for the app (i.e. cs-fundamentals)"
   type        = string
@@ -47,7 +42,7 @@ variable "db_url" {
 }
 
 variable "zone_name" {
-  description = "Hosted zone name (i.e. example-domain.com.)"
+  description = "Hosted zone name (i.e. jasoncorrea.dev.)"
   type        = string
   default     = null
 }
@@ -125,4 +120,9 @@ variable "runtime_alert_email" {
   description = "Optional email address for receiving runtime alerts via SNS."
   type        = string
   default     = ""
+}
+
+variable "alb_allowed_cidrs" {
+  description = "CIDR blocks allowed to reach the public ALB for this env"
+  type        = list(string)
 }

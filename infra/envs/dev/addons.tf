@@ -63,3 +63,26 @@ resource "aws_eks_addon" "coredns" {
 #     delete = "5m"
 #   }
 # }
+
+# Allow ALB to reach pods on HTTP 8080 via the cluster SG
+data "aws_security_group" "eks_cluster" {
+  filter {
+    name   = "tag:aws:eks:cluster-name"
+    values = [module.eks.cluster_name]
+  }
+}
+
+resource "aws_security_group_rule" "allow_alb_to_pods_http" {
+  type      = "ingress"
+  from_port = 8080
+  to_port   = 8080
+  protocol  = "tcp"
+
+  # EKS cluster/node SG
+  security_group_id = data.aws_security_group.eks_cluster.id
+
+  # ALB SG from the new alb_sg module
+  source_security_group_id = module.alb_sg.security_group_id
+
+  description = "Allow ALB to reach pods via HTTP 8080"
+}
