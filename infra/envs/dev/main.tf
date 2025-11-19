@@ -145,10 +145,10 @@ module "secret_sync" {
   k8s_secret_name = "${local.app_ns}-db"
   region          = "us-west-2"
 
-  # depends_on = [
-  #   module.csi_driver,
-  #   module.csi_aws_provider
-  # ]
+  depends_on = [
+    module.csi_driver,
+    module.csi_aws_provider
+  ]
 }
 
 # module "cluster_autoscaler_irsa" {
@@ -241,9 +241,9 @@ module "fluentbit_irsa" {
 #   ]
 # }
 
-# module "metrics_server_chart" {
-#   source = "../../modules/metrics_server_chart"
-# }
+module "metrics_server_chart" {
+  source = "../../modules/metrics_server_chart"
+}
 
 # module "app_chart" {
 #   source = "../../modules/app_chart"
