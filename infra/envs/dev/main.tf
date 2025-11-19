@@ -197,19 +197,19 @@ module "cluster_autoscaler" {
   ]
 }
 
-# module "cloudwatch_irsa_agent" {
-#   source            = "../../modules/cloudwatch_irsa_agent"
-#   cluster_name      = module.eks.cluster_name
-#   oidc_provider_arn = module.irsa.oidc_provider_arn
-#   namespace         = "amazon-cloudwatch"
-#   service_account   = "cloudwatch-agent"
-#   role_name         = "${local.app_ns}-cloudwatch-agent-role"
+module "cloudwatch_irsa_agent" {
+  source            = "../../modules/cloudwatch_irsa_agent"
+  cluster_name      = module.eks.cluster_name
+  oidc_provider_arn = module.irsa.oidc_provider_arn
+  namespace         = "amazon-cloudwatch"
+  service_account   = "cloudwatch-agent"
+  role_name         = "${local.app_ns}-${local.environment}-cloudwatch-agent-role"
 
-#   depends_on = [
-#     module.eks,
-#     module.irsa,
-#   ]
-# }
+  depends_on = [
+    module.eks,
+    module.irsa,
+  ]
+}
 
 module "fluentbit_irsa" {
   source            = "../../modules/fluentbit_irsa"
@@ -225,31 +225,29 @@ module "fluentbit_irsa" {
   ]
 }
 
-# module "cloudwatch_agent_chart" {
-#   source       = "../../modules/cloudwatch_agent_chart"
-#   cluster_name = module.eks.cluster_name
-#   region       = "us-west-2"
-#   role_arn     = module.cloudwatch_irsa_agent.role_arn
-#   # chart_version = "x.y.z"
+module "cloudwatch_agent_chart" {
+  source       = "../../modules/cloudwatch_agent_chart"
+  cluster_name = module.eks.cluster_name
+  region       = "us-west-2"
+  role_arn     = module.cloudwatch_irsa_agent.role_arn
 
-#   depends_on = [
-#     module.eks,
-#     module.irsa,
-#   ]
-# }
+  depends_on = [
+    module.eks,
+    module.irsa,
+  ]
+}
 
-# module "aws_for_fluent_bit_chart" {
-#   source       = "../../modules/aws_for_fluent_bit_chart"
-#   cluster_name = module.eks.cluster_name
-#   region       = "us-west-2"
-#   role_arn     = module.fluentbit_irsa.role_arn
-#   # chart_version = "x.y.z"
+module "aws_for_fluent_bit_chart" {
+  source       = "../../modules/aws_for_fluent_bit_chart"
+  cluster_name = module.eks.cluster_name
+  region       = "us-west-2"
+  role_arn     = module.fluentbit_irsa.role_arn
 
-#   depends_on = [
-#     module.eks,
-#     module.irsa,
-#   ]
-# }
+  depends_on = [
+    module.eks,
+    module.irsa,
+  ]
+}
 
 module "security_policies" {
   source          = "../../modules/security_policies"

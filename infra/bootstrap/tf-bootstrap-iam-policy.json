@@ -115,6 +115,7 @@
 				"iam:GetRole",
 				"iam:PassRole",
 				"iam:TagRole",
+				"iam:ListRoles",
 				"iam:CreatePolicy",
 				"iam:DeletePolicy",
 				"iam:GetPolicy",
