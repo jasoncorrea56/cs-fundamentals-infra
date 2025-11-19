@@ -4,8 +4,8 @@ locals {
 
   # Application name, namespace & service account
   app_name = var.app_name
-  app_ns = var.app_namespace
-  app_sa = var.service_account
+  app_ns   = var.app_namespace
+  app_sa   = var.service_account
 
   # Effective cluster name:
   # - For existing prod: terraform.tfvars sets cluster_name,

@@ -139,6 +139,7 @@
 				"logs:ListTagsForResource",
 				"logs:PutRetentionPolicy",
 				"logs:CreateLogGroup",
+				"logs:DeleteLogGroup",
 				"cloudwatch:DescribeAlarms",
 				"cloudwatch:ListTagsForResource",
 				"cloudwatch:PutMetricAlarm",
@@ -176,7 +177,7 @@
 				"eks:ListAddons",
 				"eks:DescribeCluster"
 			],
-			"Resource": "arn:aws:eks:us-west-2:948319129176:cluster/csf-cluster"
+			"Resource": "arn:aws:eks:us-west-2:948319129176:cluster/csf-*"
 		},
 		{
 			"Effect": "Allow",
@@ -187,7 +188,7 @@
 				"eks:DescribeUpdate",
 				"eks:ListTagsForResource"
 			],
-			"Resource": "arn:aws:eks:us-west-2:948319129176:addon/csf-cluster/*"
+			"Resource": "arn:aws:eks:us-west-2:948319129176:addon/csf-*/*"
 		},
 		{
 			"Effect": "Allow",

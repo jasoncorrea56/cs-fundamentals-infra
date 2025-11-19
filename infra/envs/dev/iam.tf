@@ -3,6 +3,12 @@ locals {
   github_repo  = var.github_repo
 }
 
+# Shared GitHub Actions deploy role (created in prod/global).
+# Dev only reads it and exposes the ARN via outputs.
+data "aws_iam_role" "gha_deployer" {
+  name = "${var.app_namespace}-github-deployer"
+}
+
 # --- EKS Cluster Role --- #
 data "aws_iam_policy_document" "eks_cluster_trust" {
   statement {
@@ -65,11 +71,9 @@ resource "aws_iam_role_policy_attachment" "node_ssm" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
-# --- GitHub OIDC provider (GHA -> AWS) --- #
-resource "aws_iam_openid_connect_provider" "github" {
-  url             = "https://token.actions.githubusercontent.com"
-  client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1"]
+# --- Shared GitHub OIDC provider (GHA -> AWS) - 1 per account --- #
+data "aws_iam_openid_connect_provider" "github" {
+  url = "https://token.actions.githubusercontent.com"
 }
 
 # --- IAM Role trusted by GitHub OIDC --- #
@@ -79,7 +83,7 @@ data "aws_iam_policy_document" "gha_assume_role" {
 
     principals {
       type        = "Federated"
-      identifiers = [aws_iam_openid_connect_provider.github.arn]
+      identifiers = [data.aws_iam_openid_connect_provider.github.arn]
     }
 
     condition {
@@ -95,11 +99,6 @@ data "aws_iam_policy_document" "gha_assume_role" {
       values   = ["repo:${local.github_owner}/${local.github_repo}:*"]
     }
   }
-}
-
-resource "aws_iam_role" "gha_deployer" {
-  name               = "${local.app_ns}-github-deployer"
-  assume_role_policy = data.aws_iam_policy_document.gha_assume_role.json
 }
 
 # --- Minimal Permissions --- #
@@ -130,23 +129,13 @@ data "aws_iam_policy_document" "gha_permissions" {
   }
 }
 
-resource "aws_iam_policy" "gha_deployer" {
-  name   = "${local.app_ns}-github-deployer-policy"
-  policy = data.aws_iam_policy_document.gha_permissions.json
-}
-
-resource "aws_iam_role_policy_attachment" "gha_deployer_attach" {
-  role       = aws_iam_role.gha_deployer.name
-  policy_arn = aws_iam_policy.gha_deployer.arn
-}
-
 # IRSA for the EBS CSI controller
 data "aws_iam_policy" "ebs_csi_managed" {
   arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
 }
 
 resource "aws_iam_role" "ebs_csi_irsa" {
-  name = "${local.app_ns}-ebs-csi-controller-role"
+  name = "${local.app_ns}-${local.environment}-ebs-csi-controller-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",

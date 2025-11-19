@@ -22,6 +22,6 @@ output "app_domain" {
 }
 
 output "github_actions_role_arn" {
-  value       = aws_iam_role.gha_deployer.arn
+  value       = data.aws_iam_role.gha_deployer.arn
   description = "IAM role ARN that GitHub Actions assumes (set as AWS_ROLE_TO_ASSUME)."
 }
