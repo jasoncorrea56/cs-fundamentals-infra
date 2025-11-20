@@ -283,31 +283,35 @@ module "metrics_server_chart" {
   source = "../../modules/metrics_server_chart"
 }
 
-# module "app_chart" {
-#   source = "../../modules/app_chart"
+module "app_chart" {
+  source      = "../../modules/app_chart"
+  environment = local.environment
 
-#   chart_path  = abspath("${path.module}/../../../../${local.app_name}/helm")
-#   # For dev, use the base values (no public ingress/TLS by default).
-#   values_file = abspath("${path.module}/../../../../${local.app_name}/helm/values.yaml")
+  # For dev we *disable* TF management of the app:
+  # CI/CD (GitHub Actions + Helm) is the source of truth here.
+  enable     = false
+  chart_path = abspath("${path.module}/../../../../${local.app_name}/helm")
 
-#   # Dev runs internal-only for now (no ACM / TLS).
-#   acm_certificate_arn = ""
+  # For dev, use the base values (no public ingress/TLS by default).
+  values_file = abspath("${path.module}/../../../../${local.app_name}/helm/values.yaml")
 
-#   namespace    = local.app_ns
-#   release_name = local.app_ns
+  # Dev runs internal-only from the module's POV (no ACM/TLS).
+  acm_certificate_arn = ""
+  namespace           = local.app_ns
+  release_name        = local.app_ns
 
-#   # No public ingress hosts for dev yet.
-#   ingress_hosts = []
+  # No public ingress hosts for dev from TF.
+  ingress_hosts = []
 
-#   # Optional: override image tag/repo at apply-time without touching values files
-#   image_overrides = [
-#     # { name = "image.repository", value = "948319129176.dkr.ecr.us-west-2.amazonaws.com/${local.app_name}" },
-#     # { name = "image.tag",        value = "v0.2.5-dev" },
-#   ]
+  # Optional: override image tag/repo at apply-time without touching values files
+  image_overrides = [
+    # { name = "image.repository", value = "948319129176.dkr.ecr.us-west-2.amazonaws.com/${local.app_name}" },
+    # { name = "image.tag",        value = "v0.2.5-dev" },
+  ]
 
-#   depends_on = [
-#     module.irsa_db,
-#     module.metrics_server_chart,
-#     module.secret_sync,
-#   ]
-# }
+  depends_on = [
+    module.irsa_db,
+    module.metrics_server_chart,
+    module.secret_sync,
+  ]
+}
