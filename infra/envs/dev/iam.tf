@@ -3,8 +3,8 @@ locals {
   github_repo  = var.github_repo
 }
 
-# Shared GitHub Actions deploy role (created in prod/global).
-# Dev only reads it and exposes the ARN via outputs.
+# Shared GitHub Actions deploy role (created in shared env).
+# Env only reads it and exposes the ARN via outputs.
 data "aws_iam_role" "gha_deployer" {
   name = "${var.app_namespace}-github-deployer"
 }
@@ -69,64 +69,6 @@ resource "aws_iam_role_policy_attachment" "node_ecr_ro" {
 resource "aws_iam_role_policy_attachment" "node_ssm" {
   role       = aws_iam_role.eks_node.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-}
-
-# --- Shared GitHub OIDC provider (GHA -> AWS) - 1 per account --- #
-data "aws_iam_openid_connect_provider" "github" {
-  url = "https://token.actions.githubusercontent.com"
-}
-
-# --- IAM Role trusted by GitHub OIDC --- #
-data "aws_iam_policy_document" "gha_assume_role" {
-  statement {
-    actions = ["sts:AssumeRoleWithWebIdentity"]
-
-    principals {
-      type        = "Federated"
-      identifiers = [data.aws_iam_openid_connect_provider.github.arn]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "token.actions.githubusercontent.com:aud"
-      values   = ["sts.amazonaws.com"]
-    }
-
-    # Only allow tokens from your repo (all branches/tags)
-    condition {
-      test     = "StringLike"
-      variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${local.github_owner}/${local.github_repo}:*"]
-    }
-  }
-}
-
-# --- Minimal Permissions --- #
-data "aws_iam_policy_document" "gha_permissions" {
-  statement {
-    sid = "EcrPush"
-    actions = [
-      "ecr:GetAuthorizationToken",
-      "ecr:BatchCheckLayerAvailability",
-      "ecr:CompleteLayerUpload",
-      "ecr:InitiateLayerUpload",
-      "ecr:PutImage",
-      "ecr:UploadLayerPart",
-      "ecr:BatchGetImage",
-      "ecr:DescribeRepositories",
-      "ecr:ListImages"
-    ]
-    resources = ["*"]
-  }
-
-  statement {
-    sid = "EksDescribe"
-    actions = [
-      "eks:DescribeCluster",
-      "eks:ListClusters"
-    ]
-    resources = ["*"]
-  }
 }
 
 # IRSA for the EBS CSI controller

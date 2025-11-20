@@ -15,11 +15,6 @@ locals {
   cluster_name = coalesce(var.cluster_name, "${var.app_namespace}-${var.environment}-cluster")
 }
 
-module "ecr_csf" {
-  source = "../../modules/ecr"
-  name   = local.app_name
-}
-
 module "vpc" {
   source       = "../../modules/vpc"
   name         = local.app_ns
@@ -191,20 +186,6 @@ module "aws_for_fluent_bit_chart" {
   # chart_version = "x.y.z"
 
   depends_on = [module.irsa]
-}
-
-module "acm_csf" {
-  source = "../../modules/acm_cert"
-
-  # App subdomain (csf.jasoncorrea.dev)
-  domain_name = var.app_domain
-
-  # Root domain (jasoncorrea.dev)
-  subject_alternative_names = [var.zone_name]
-
-  enable_validation = true
-  hosted_zone_id    = module.route53_zone.zone_id
-  region            = "us-west-2"
 }
 
 module "route53_zone" {
