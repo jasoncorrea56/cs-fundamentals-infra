@@ -8,6 +8,7 @@ locals {
     module.eks.cluster_name,
     try(module.eks.id, var.cluster_name)
   )
+  eks_cluster_sg_id = module.eks.cluster_security_group_id
 }
 
 resource "aws_eks_addon" "vpc_cni" {
@@ -79,7 +80,7 @@ resource "aws_security_group_rule" "allow_alb_to_pods_http" {
   protocol  = "tcp"
 
   # EKS cluster/node SG
-  security_group_id = data.aws_security_group.eks_cluster.id
+  security_group_id = local.eks_cluster_sg_id
 
   # ALB SG from the new alb_sg module
   source_security_group_id = module.alb_sg.security_group_id
