@@ -8,12 +8,12 @@ output "vpc_id" {
 
 output "route53_zone_id" {
   description = "Route53 hosted zone ID (shared, managed by prod)."
-  value       = data.aws_route53_zone.shared_hosted_zone.zone_id
+  value       = data.terraform_remote_state.shared.outputs.shared_zone_id
 }
 
 output "route53_name_servers" {
   description = "Name servers of the shared hosted zone (managed by prod)."
-  value       = data.aws_route53_zone.shared_hosted_zone.name_servers
+  value       = data.terraform_remote_state.shared.outputs.shared_zone_name_servers
 }
 
 output "app_domain" {

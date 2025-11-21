@@ -26,6 +26,19 @@ provider "aws" {
   region = "us-west-2"
 }
 
+data "terraform_remote_state" "shared" {
+  backend = "s3"
+
+  # Config from infra/envs/shared/backend.hcl
+  config = {
+    bucket       = "jasoncorrea56-csfundamentals-tfstate-prod-us-west-2"
+    key          = "shared/terraform.tfstate"
+    region       = "us-west-2"
+    use_lockfile = true
+    encrypt      = true
+  }
+}
+
 provider "kubernetes" {
   host                   = module.eks.cluster_endpoint
   cluster_ca_certificate = base64decode(module.eks.cluster_ca_data)

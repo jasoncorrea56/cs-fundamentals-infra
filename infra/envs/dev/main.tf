@@ -11,14 +11,8 @@ locals {
   cluster_name = coalesce(var.cluster_name, "${var.app_namespace}-${var.environment}-cluster")
 
   # DNS
-  subdomain_prefix = "${local.app_ns}-${local.environment}"       # "csf-dev", "csf-qa", ...
-  app_domain       = "${local.subdomain_prefix}.${var.zone_name}" # "csf-dev.jasoncorrea.dev"
-}
-
-# Dev uses the existing public hosted zone (created and managed by prod).
-data "aws_route53_zone" "shared_hosted_zone" {
-  name         = var.zone_name
-  private_zone = false
+  subdomain_prefix = "${local.app_ns}-${local.environment}"
+  app_domain       = "${local.subdomain_prefix}.${data.terraform_remote_state.shared.outputs.shared_zone_name}"
 }
 
 module "vpc" {
@@ -111,8 +105,8 @@ module "externaldns_chart" {
 
   # Use the existing hosted zone (managed by prod).
   owner_id        = module.eks.cluster_name
-  domain_filters  = [data.aws_route53_zone.shared_hosted_zone.name]
-  zone_id_filters = [data.aws_route53_zone.shared_hosted_zone.zone_id]
+  domain_filters  = [data.terraform_remote_state.shared.outputs.shared_zone_name]
+  zone_id_filters = [data.terraform_remote_state.shared.outputs.shared_zone_id]
 
   depends_on = [
     module.eks,
