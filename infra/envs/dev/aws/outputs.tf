@@ -30,3 +30,8 @@ output "alb_sg_id" {
   description = "Security group used by the dev ALB"
   value       = module.alb_sg.security_group_id
 }
+
+output "cluster_name" {
+  description = "EKS cluster name for this environment"
+  value       = module.eks.cluster_name
+}

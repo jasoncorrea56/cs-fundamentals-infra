@@ -16,7 +16,7 @@ locals {
 }
 
 module "vpc" {
-  source       = "../../modules/vpc"
+  source       = "../../../modules/vpc"
   name         = local.app_ns
   cidr_block   = "10.0.0.0/16"
   cluster_name = local.cluster_name
@@ -24,7 +24,7 @@ module "vpc" {
 }
 
 module "alb_sg" {
-  source        = "../../modules/alb_sg"
+  source        = "../../../modules/alb_sg"
   name_prefix   = "${local.app_ns}-${local.environment}-alb"
   vpc_id        = module.vpc.vpc_id
   allowed_cidrs = var.alb_allowed_cidrs
@@ -33,7 +33,7 @@ module "alb_sg" {
 }
 
 module "eks" {
-  source             = "../../modules/eks"
+  source             = "../../../modules/eks"
   cluster_name       = local.cluster_name
   kubernetes_version = var.kubernetes_version
   public_subnets     = module.vpc.public_subnets
@@ -45,14 +45,14 @@ module "eks" {
 }
 
 module "irsa" {
-  source       = "../../modules/irsa"
+  source       = "../../../modules/irsa"
   cluster_name = module.eks.cluster_name
 
   depends_on = [module.eks]
 }
 
 module "alb_irsa" {
-  source            = "../../modules/alb_irsa"
+  source            = "../../../modules/alb_irsa"
   cluster_name      = module.eks.cluster_name
   oidc_provider_arn = module.irsa.oidc_provider_arn
   role_name         = "${local.app_ns}-${local.environment}-alb-controller-role"
@@ -64,13 +64,13 @@ module "alb_irsa" {
 }
 
 module "alb_controller_policy" {
-  source      = "../../modules/alb_controller_policy"
+  source      = "../../../modules/alb_controller_policy"
   policy_name = "AWSLoadBalancerControllerIAMPolicy-csf-${local.environment}"
   role_name   = "${local.app_ns}-${local.environment}-alb-controller-role"
 }
 
 module "alb_controller_chart" {
-  source       = "../../modules/alb_controller_chart"
+  source       = "../../../modules/alb_controller_chart"
   cluster_name = module.eks.cluster_name
   region       = "us-west-2"
   vpc_id       = module.vpc.vpc_id
@@ -83,7 +83,7 @@ module "alb_controller_chart" {
 }
 
 module "externaldns_irsa" {
-  source            = "../../modules/externaldns_irsa"
+  source            = "../../../modules/externaldns_irsa"
   cluster_name      = module.eks.cluster_name
   oidc_provider_arn = module.irsa.oidc_provider_arn
   namespace         = "kube-system"
@@ -97,7 +97,7 @@ module "externaldns_irsa" {
 }
 
 module "externaldns_chart" {
-  source       = "../../modules/externaldns_chart"
+  source       = "../../../modules/externaldns_chart"
   cluster_name = module.eks.cluster_name
   namespace    = "kube-system"
   sa_name      = "external-dns"
@@ -115,7 +115,7 @@ module "externaldns_chart" {
 }
 
 module "db_secret" {
-  source = "../../modules/asm_secret"
+  source = "../../../modules/asm_secret"
 
   # Per-env secret name (i.e. csf/dev/db-url)
   name   = "${local.app_ns}/${local.environment}/db-url"
@@ -123,7 +123,7 @@ module "db_secret" {
 }
 
 module "irsa_db" {
-  source            = "../../modules/irsa_secrets"
+  source            = "../../../modules/irsa_secrets"
   cluster_name      = module.eks.cluster_name
   oidc_provider_arn = module.irsa.oidc_provider_arn
   namespace         = local.app_ns
@@ -139,15 +139,15 @@ module "irsa_db" {
 }
 
 module "csi_driver" {
-  source = "../../modules/csi_driver_chart"
+  source = "../../../modules/csi_driver_chart"
 }
 
 module "csi_aws_provider" {
-  source = "../../modules/csi_aws_provider_chart"
+  source = "../../../modules/csi_aws_provider_chart"
 }
 
 module "secret_sync" {
-  source          = "../../modules/secret_sync"
+  source          = "../../../modules/secret_sync"
   namespace       = local.app_ns
   app_sa          = local.app_sa
   role_arn        = module.irsa_db.role_arn
@@ -165,7 +165,7 @@ module "secret_sync" {
 }
 
 module "cluster_autoscaler_irsa" {
-  source            = "../../modules/cluster_autoscaler_irsa"
+  source            = "../../../modules/cluster_autoscaler_irsa"
   cluster_name      = module.eks.cluster_name
   oidc_provider_arn = module.irsa.oidc_provider_arn
   namespace         = "kube-system"
@@ -179,7 +179,7 @@ module "cluster_autoscaler_irsa" {
 }
 
 module "cluster_autoscaler" {
-  source       = "../../modules/cluster_autoscaler_chart"
+  source       = "../../../modules/cluster_autoscaler_chart"
   cluster_name = module.eks.cluster_name
   region       = "us-west-2"
   role_arn     = module.cluster_autoscaler_irsa.role_arn
@@ -192,7 +192,7 @@ module "cluster_autoscaler" {
 }
 
 module "cloudwatch_irsa_agent" {
-  source            = "../../modules/cloudwatch_irsa_agent"
+  source            = "../../../modules/cloudwatch_irsa_agent"
   cluster_name      = module.eks.cluster_name
   oidc_provider_arn = module.irsa.oidc_provider_arn
   namespace         = "amazon-cloudwatch"
@@ -206,7 +206,7 @@ module "cloudwatch_irsa_agent" {
 }
 
 module "fluentbit_irsa" {
-  source            = "../../modules/fluentbit_irsa"
+  source            = "../../../modules/fluentbit_irsa"
   cluster_name      = module.eks.cluster_name
   oidc_provider_arn = module.irsa.oidc_provider_arn
   namespace         = "amazon-cloudwatch"
@@ -220,7 +220,7 @@ module "fluentbit_irsa" {
 }
 
 module "cloudwatch_agent_chart" {
-  source       = "../../modules/cloudwatch_agent_chart"
+  source       = "../../../modules/cloudwatch_agent_chart"
   cluster_name = module.eks.cluster_name
   region       = "us-west-2"
   role_arn     = module.cloudwatch_irsa_agent.role_arn
@@ -232,7 +232,7 @@ module "cloudwatch_agent_chart" {
 }
 
 module "aws_for_fluent_bit_chart" {
-  source       = "../../modules/aws_for_fluent_bit_chart"
+  source       = "../../../modules/aws_for_fluent_bit_chart"
   cluster_name = module.eks.cluster_name
   region       = "us-west-2"
   role_arn     = module.fluentbit_irsa.role_arn
@@ -244,7 +244,7 @@ module "aws_for_fluent_bit_chart" {
 }
 
 module "security_policies" {
-  source          = "../../modules/security_policies"
+  source          = "../../../modules/security_policies"
   namespace       = local.app_ns
   service_account = var.service_account
   app_port        = 8080
@@ -274,11 +274,11 @@ module "security_policies" {
 }
 
 module "metrics_server_chart" {
-  source = "../../modules/metrics_server_chart"
+  source = "../../../modules/metrics_server_chart"
 }
 
 module "app_chart" {
-  source      = "../../modules/app_chart"
+  source      = "../../../modules/app_chart"
   environment = local.environment
 
   # For dev we *disable* TF management of the app:
