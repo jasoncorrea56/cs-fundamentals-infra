@@ -340,3 +340,18 @@ To add `qa` (or any new env):
 
 Once these steps are done, QA should be reachable at `http(s)://csf-qa.jasoncorrea.dev`,
 following the same patterns and guardrails as the existing `dev` environment.
+
+## macOS DNS Cache Flush (Required After Rebuilding Hosted Zones)
+
+When rebuilding Route53 hosted zones or updating NS records at the registrar, macOS can keep stale DNS entries even when dig resolves correctly.
+
+If curl or Postman fail with:
+
+`curl: (6) Could not resolve host`
+
+Flush the local DNS cache:
+
+```bash
+sudo dscacheutil -flushcache
+sudo killall -HUP mDNSResponder
+```

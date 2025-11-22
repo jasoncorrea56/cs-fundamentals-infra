@@ -34,6 +34,19 @@ data "terraform_remote_state" "dev_aws" {
   }
 }
 
+data "terraform_remote_state" "shared" {
+  backend = "s3"
+
+  # Config from infra/envs/shared/backend.hcl
+  config = {
+    bucket       = "jasoncorrea56-csfundamentals-tfstate-prod-us-west-2"
+    key          = "shared/terraform.tfstate"
+    region       = "us-west-2"
+    use_lockfile = true
+    encrypt      = true
+  }
+}
+
 # Derive EKS endpoint + CA from AWS directly, using the cluster_name from dev/aws outputs
 data "aws_eks_cluster" "app" {
   name = data.terraform_remote_state.dev_aws.outputs.cluster_name

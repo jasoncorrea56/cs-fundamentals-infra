@@ -35,3 +35,44 @@ output "cluster_name" {
   description = "EKS cluster name for this environment"
   value       = module.eks.cluster_name
 }
+
+output "vpc_cidr_block" {
+  value = module.vpc.cidr_block
+}
+
+output "alb_controller_role_arn" {
+  value = module.alb_irsa.role_arn
+}
+
+output "externaldns_role_arn" {
+  value = module.externaldns_irsa.role_arn
+}
+
+output "cluster_autoscaler_role_arn" {
+  value = module.cluster_autoscaler_irsa.role_arn
+}
+
+output "cloudwatch_agent_role_arn" {
+  value = module.cloudwatch_irsa_agent.role_arn
+}
+
+output "fluent_bit_role_arn" {
+  value = module.fluentbit_irsa.role_arn
+}
+
+output "app_secrets_role_arn" {
+  value = module.irsa_db.role_arn
+}
+
+output "db_secret_arn" {
+  value = module.db_secret.secret_arn
+}
+
+# DNS passthrough from shared env
+output "shared_zone_name" {
+  value = data.terraform_remote_state.shared.outputs.shared_zone_name
+}
+
+output "shared_zone_id" {
+  value = data.terraform_remote_state.shared.outputs.shared_zone_id
+}
