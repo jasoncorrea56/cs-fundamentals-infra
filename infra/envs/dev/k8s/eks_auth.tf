@@ -1,5 +1,5 @@
 ############################################################
-# EKS aws-auth & GitHub deployer RBAC
+# EKS aws-auth & GitHub deployer RBAC (dev/k8s layer)
 #
 # - Maps:
 #     - Worker node role  -> system:nodes (required for node auth)
@@ -10,7 +10,6 @@
 #     - Creating the smoke-test Job
 ############################################################
 
-# Derive optional console admins from tfvars
 locals {
   # Roles (i.e. SSO assumed roles) -> system:masters
   admin_maproles = [
@@ -41,7 +40,8 @@ resource "kubernetes_config_map_v1" "aws_auth" {
     {
       mapRoles = yamlencode(concat([
         {
-          rolearn  = aws_iam_role.eks_node.arn
+          # Worker nodes (from dev/aws remote state)
+          rolearn  = data.terraform_remote_state.dev_aws.outputs.eks_node_role_arn
           username = "system:node:{{EC2PrivateDNSName}}"
           groups = [
             "system:bootstrappers",
@@ -49,11 +49,10 @@ resource "kubernetes_config_map_v1" "aws_auth" {
           ]
         },
         {
-          rolearn  = data.aws_iam_role.gha_deployer.arn
+          # GitHub deployer IAM role (from dev/aws remote state)
+          rolearn  = data.terraform_remote_state.dev_aws.outputs.github_actions_role_arn
           username = "github-deployer"
-          groups = [
-            "github-deployer",
-          ]
+          groups   = ["github-deployer"]
         },
       ], local.admin_maproles))
     },

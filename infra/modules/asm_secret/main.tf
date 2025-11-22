@@ -1,8 +1,9 @@
 resource "aws_secretsmanager_secret" "this" {
-  name = var.name
+  name                    = var.name
+  recovery_window_in_days = 0
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 }
 

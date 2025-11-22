@@ -18,7 +18,7 @@ resource "aws_cloudwatch_log_group" "ci_host" {
 
 # Control plane logs (if enabled) commonly land here
 resource "aws_cloudwatch_log_group" "eks_cluster" {
-  name              = "/aws/eks/${module.eks.cluster_name}/cluster"
+  name              = "/aws/eks/${local.cluster_name}/cluster"
   retention_in_days = 3
   lifecycle { prevent_destroy = false }
 }

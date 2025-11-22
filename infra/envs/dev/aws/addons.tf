@@ -9,6 +9,7 @@ locals {
     try(module.eks.id, var.cluster_name)
   )
   eks_cluster_sg_id = module.eks.cluster_security_group_id
+  alb_allowed_cidrs = var.alb_allowed_cidrs
 }
 
 resource "aws_eks_addon" "vpc_cni" {
@@ -65,14 +66,6 @@ resource "aws_eks_addon" "coredns" {
 #   }
 # }
 
-# Allow ALB to reach pods on HTTP 8080 via the cluster SG
-data "aws_security_group" "eks_cluster" {
-  filter {
-    name   = "tag:aws:eks:cluster-name"
-    values = [module.eks.cluster_name]
-  }
-}
-
 resource "aws_security_group_rule" "allow_alb_to_pods_http" {
   type      = "ingress"
   from_port = 8080
@@ -80,10 +73,20 @@ resource "aws_security_group_rule" "allow_alb_to_pods_http" {
   protocol  = "tcp"
 
   # EKS cluster/node SG
-  security_group_id = local.eks_cluster_sg_id
+  security_group_id = module.alb_sg.security_group_id
 
   # ALB SG from the new alb_sg module
-  source_security_group_id = module.alb_sg.security_group_id
+  source_security_group_id = module.eks.cluster_security_group_id
 
   description = "Allow ALB to reach pods via HTTP 8080"
+}
+
+resource "aws_security_group_rule" "alb_ingress_admin_http" {
+  type              = "ingress"
+  description       = "Allow admin HTTP 80 to ALB"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  security_group_id = module.alb_sg.security_group_id
+  cidr_blocks       = local.alb_allowed_cidrs
 }

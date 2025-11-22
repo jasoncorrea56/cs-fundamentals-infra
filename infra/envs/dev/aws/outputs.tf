@@ -36,6 +36,11 @@ output "cluster_name" {
   value       = module.eks.cluster_name
 }
 
+output "eks_node_role_arn" {
+  description = "IAM role used by EKS worker nodes"
+  value       = aws_iam_role.eks_node.arn
+}
+
 output "vpc_cidr_block" {
   value = module.vpc.cidr_block
 }

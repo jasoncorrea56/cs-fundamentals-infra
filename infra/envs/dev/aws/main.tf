@@ -41,7 +41,10 @@ module "eks" {
   cluster_role_arn   = aws_iam_role.eks_cluster.arn
   node_role_arn      = aws_iam_role.eks_node.arn
 
-  depends_on = [module.vpc]
+  depends_on = [
+    module.vpc,
+    aws_cloudwatch_log_group.eks_cluster,
+  ]
 }
 
 module "irsa" {
@@ -67,6 +70,8 @@ module "alb_controller_policy" {
   source      = "../../../modules/alb_controller_policy"
   policy_name = "AWSLoadBalancerControllerIAMPolicy-csf-${local.environment}"
   role_name   = "${local.app_ns}-${local.environment}-alb-controller-role"
+
+  depends_on = [module.alb_irsa]
 }
 
 module "externaldns_irsa" {

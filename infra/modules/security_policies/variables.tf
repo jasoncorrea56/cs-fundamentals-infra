@@ -51,3 +51,9 @@ variable "app_port" {
   type        = number
   default     = 8080
 }
+
+variable "manage_namespace" {
+  type        = bool
+  default     = true
+  description = "If false, do not create/delete the Namespace - assume it's managed elsewhere"
+}

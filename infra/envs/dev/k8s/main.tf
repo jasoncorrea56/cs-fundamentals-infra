@@ -107,6 +107,9 @@ module "security_policies" {
   app_port        = 8080
   ingress_cidrs   = [data.terraform_remote_state.dev_aws.outputs.vpc_cidr_block]
 
+  # Dev: namespace is app/CI-managed, so don't try to create/destroy it from TF
+  manage_namespace = false
+
   app_selector = {
     key   = "app.kubernetes.io/name"
     value = local.app_name
