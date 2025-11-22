@@ -8,3 +8,9 @@ variable "secret_arn" {
   description = "Full ARN of the AWS Secrets Manager secret (i.e. from module.db_secret.arn)."
   type        = string
 }
+
+variable "enable" {
+  description = "Whether to create the SecretProviderClass + synced Secret."
+  type        = bool
+  default     = true
+}

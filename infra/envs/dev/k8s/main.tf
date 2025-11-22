@@ -8,6 +8,12 @@ locals {
   cluster_name = coalesce(var.cluster_name, "${var.app_namespace}-${var.environment}-cluster")
 }
 
+resource "kubernetes_namespace_v1" "app" {
+  metadata {
+    name = local.app_namespace
+  }
+}
+
 module "alb_controller_chart" {
   source       = "../../../modules/alb_controller_chart"
   cluster_name = local.cluster_name
@@ -40,10 +46,18 @@ module "externaldns_chart" {
 
 module "csi_driver" {
   source = "../../../modules/csi_driver_chart"
+
+  depends_on = [
+    data.terraform_remote_state.dev_aws,
+  ]
 }
 
 module "csi_aws_provider" {
   source = "../../../modules/csi_aws_provider_chart"
+
+  depends_on = [
+    module.csi_driver,
+  ]
 }
 
 module "secret_sync" {
@@ -54,9 +68,10 @@ module "secret_sync" {
   k8s_secret_name = "${local.app_namespace}-db"
   region          = "us-west-2"
 
-  # Come from the aws stack via remote_state
   role_arn   = data.terraform_remote_state.dev_aws.outputs.app_secrets_role_arn
   secret_arn = data.terraform_remote_state.dev_aws.outputs.db_secret_arn
+
+  enable = var.secret_sync_enable
 
   depends_on = [
     module.csi_aws_provider,
@@ -126,6 +141,7 @@ module "security_policies" {
   }
 
   depends_on = [
+    kubernetes_namespace_v1.app,
     module.alb_controller_chart,
     module.externaldns_chart,
   ]

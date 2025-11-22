@@ -62,9 +62,7 @@ resource "kubernetes_config_map_v1" "aws_auth" {
   )
 
   depends_on = [
-    module.eks,
-    aws_iam_role.eks_node,
-    data.aws_iam_role.gha_deployer,
+    data.terraform_remote_state.dev_aws,
   ]
 }
 

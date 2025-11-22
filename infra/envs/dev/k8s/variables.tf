@@ -126,3 +126,10 @@ variable "alb_allowed_cidrs" {
   description = "CIDR blocks allowed to reach the public ALB for this env"
   type        = list(string)
 }
+
+variable "secret_sync_enable" {
+  description = "Whether to create the SecretProviderClass + synced secret (see bootstrap notes)."
+  type        = bool
+  # IMPORTANT: from a totally clean cluster, this should start as false
+  default = false
+}

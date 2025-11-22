@@ -11,6 +11,7 @@ resource "kubernetes_service_account" "app" {
 
 # SecretProviderClass (CRD) via kubernetes_manifest
 resource "kubernetes_manifest" "spc" {
+  count = var.enable ? 1 : 0
   manifest = {
     apiVersion = "secrets-store.csi.x-k8s.io/v1"
     kind       = "SecretProviderClass"
