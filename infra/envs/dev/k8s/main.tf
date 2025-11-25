@@ -122,7 +122,8 @@ module "security_policies" {
   app_port        = 8080
   ingress_cidrs   = [data.terraform_remote_state.dev_aws.outputs.vpc_cidr_block]
 
-  # Dev: namespace is app/CI-managed, so don't try to create/destroy it from TF
+  # Dev: namespace is app/CI-managed; this flag only controls whether the
+  # security_policies module itself tries to create/destroy it.
   manage_namespace = false
 
   app_selector = {
@@ -155,29 +156,31 @@ module "app_chart" {
   source      = "../../../modules/app_chart"
   environment = local.environment
 
-  # For dev we *disable* TF management of the app:
-  # CI/CD (GitHub Actions + Helm) is the source of truth here.
-  enable     = false
+  # For dev we now let TF manage the app Helm release as well,
+  # controlled by a flag just like prod.
+  enable     = var.app_chart_enable
   chart_path = abspath("${path.module}/../../../../../${local.app_name}/helm")
 
-  # For dev, use the base values (no public ingress/TLS by default).
-  values_file = abspath("${path.module}/../../../../../${local.app_name}/helm/values.yaml")
+  # Dev uses the base values file.
+  values_file = abspath("${path.module}/../../../../../${local.app_name}/helm/values-dev.yaml")
 
   acm_certificate_arn = var.acm_certificate_arn
   namespace           = local.app_namespace
   release_name        = local.app_namespace
 
-  # No public ingress hosts for dev from TF.
-  ingress_hosts = []
+  # Dev ingress host (e.g. csf-dev.jasoncorrea.dev)
+  ingress_hosts = [
+    var.app_domain,
+  ]
 
-  # Optional: override image tag/repo at apply-time without touching values files
   image_overrides = [
     # { name = "image.repository", value = "948319129176.dkr.ecr.us-west-2.amazonaws.com/${local.app_name}" },
-    # { name = "image.tag",        value = "0.7.2-340c000" },
+    # { name = "image.tag",        value = "0.7.4-48d81fc" },
   ]
 
   depends_on = [
     module.metrics_server_chart,
     module.secret_sync,
+    module.alb_controller_chart,
   ]
 }
