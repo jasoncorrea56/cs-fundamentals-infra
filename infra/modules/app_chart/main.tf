@@ -1,4 +1,8 @@
 resource "helm_release" "app" {
+  # Allow callers (dev vs prod/qa/dr) to decide whether TF manages this release.
+  # In dev you'll set enable = false so CI/CD owns the app.
+  count = var.enable ? 1 : 0
+
   name       = var.release_name
   namespace  = var.namespace
   repository = null
@@ -14,6 +18,12 @@ resource "helm_release" "app" {
   values = [
     file(var.values_file)
   ]
+
+  # Turn ingress on/off based on whether this env has any hosts configured.
+  set {
+    name  = "ingress.enabled"
+    value = length(var.ingress_hosts) > 0 ? "true" : "false"
+  }
 
   # Disable CSI Secrets Store at the chart level (avoid mounting secrets-store.csi.k8s.io)
   set {
@@ -45,6 +55,7 @@ resource "helm_release" "app" {
     }
   }
 
+  # Hosts per env (dev/qa/prod/dr). Empty list = no ingress.
   dynamic "set" {
     for_each = var.ingress_hosts
     content {

@@ -11,6 +11,11 @@ variable "app_selector" {
   })
 }
 
+variable "service_account" {
+  description = "Name of service account the app runs under"
+  type        = string
+}
+
 variable "allow_db_egress" {
   description = "Allow DB egress? If true, opens TCP port(s) to the provided CIDRs"
   type = object({
@@ -45,4 +50,10 @@ variable "app_port" {
   description = "Container port exposed by the app"
   type        = number
   default     = 8080
+}
+
+variable "manage_namespace" {
+  type        = bool
+  default     = true
+  description = "If false, do not create/delete the Namespace - assume it's managed elsewhere"
 }

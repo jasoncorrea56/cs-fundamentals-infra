@@ -1,5 +1,31 @@
-variable "app_domain" {
-  description = "FQDN for the app (i.e. csf.example-domain.com)"
+variable "environment" {
+  description = "Environment name (e.g., dev, prod, qa)"
+  type        = string
+  default     = "dev"
+}
+
+variable "app_name" {
+  description = "Name of the app being hosted (i.e. cs-fundamentals)"
+  type        = string
+}
+
+variable "app_namespace" {
+  description = "Namespace for the app being hosted (i.e. csf)"
+  type        = string
+}
+
+variable "github_repo" {
+  description = "Github repo for the app (i.e. cs-fundamentals)"
+  type        = string
+}
+
+variable "github_owner" {
+  description = "Owner of the Github repo (i.e. jasoncorrea56)"
+  type        = string
+}
+
+variable "service_account" {
+  description = "Name of service account under which the app runs (i.e. csf-app)"
   type        = string
 }
 
@@ -16,15 +42,27 @@ variable "db_url" {
 }
 
 variable "zone_name" {
-  description = "Hosted zone name (i.e. example-domain.com.)"
+  description = "Hosted zone name (i.e. jasoncorrea.dev)"
   type        = string
   default     = null
 }
 
 variable "cluster_name" {
+  description = "EKS cluster name override. If unset, defaults to <app_namespace>-<environment>-cluster for new envs."
   type        = string
-  description = "EKS cluster name"
-  default     = "csf-cluster"
+  default     = null
+}
+
+variable "eks_cluster_role_name" {
+  description = "IAM role name for the EKS control plane"
+  type        = string
+  default     = "csf-dev-eks-cluster-role"
+}
+
+variable "eks_node_role_name" {
+  description = "IAM role name for the EKS node group"
+  type        = string
+  default     = "csf-dev-eks-node-role"
 }
 
 variable "kubernetes_version" {
@@ -53,7 +91,7 @@ variable "enable_apex_alias" {
   default     = false
 }
 
-# Optional: original ALB name like "k8s-csf-csfcsfun-145ebc3211"
+# Optional: ALB name like "k8s-csf-csfcsfun-123abc4321"
 variable "alb_name" {
   type    = string
   default = ""
@@ -77,9 +115,13 @@ variable "enable_runtime_alerts" {
   default     = false
 }
 
-# infra/envs/prod/variables.tf
 variable "runtime_alert_email" {
   description = "Optional email address for receiving runtime alerts via SNS."
   type        = string
   default     = ""
+}
+
+variable "alb_allowed_cidrs" {
+  description = "CIDR blocks allowed to reach the public ALB for this env"
+  type        = list(string)
 }

@@ -10,6 +10,18 @@ variable "namespace" {
   default     = "csf"
 }
 
+variable "enable" {
+  description = "Whether to install/manage the app Helm release from this module"
+  type        = bool
+  default     = true
+}
+
+variable "environment" {
+  description = "Logical environment name (dev, qa, prod, etc.)"
+  type        = string
+  default     = "dev"
+}
+
 variable "chart_path" {
   type        = string
   description = "Path to the app Helm chart directory"
@@ -31,7 +43,7 @@ variable "image_overrides" {
 
 variable "acm_certificate_arn" {
   type        = string
-  description = "ACM certificate ARN for ALB HTTPS; if empty, no override is set"
+  description = "ACM certificate ARN for ALB HTTPS. If empty, no override is set"
   default     = ""
 }
 

@@ -1,15 +1,20 @@
-variable "cluster_name" { type = string }
-variable "region" { type = string }
-variable "role_arn" { type = string }
-variable "namespace" {
-  type    = string
-  default = "kube-system"
+variable "cluster_name" {
+  description = "EKS cluster name for this environment"
+  type        = string
 }
-variable "sa_name" {
-  type    = string
-  default = "cluster-autoscaler"
+
+variable "region" {
+  description = "AWS region where the cluster runs"
+  type        = string
 }
+
+variable "role_arn" {
+  description = "IAM role ARN used for IRSA (annotated on the ServiceAccount)"
+  type        = string
+}
+
 variable "chart_version" {
-  type    = string
-  default = null
+  description = "Helm chart version for cluster-autoscaler"
+  type        = string
+  default     = "9.52.1"
 }

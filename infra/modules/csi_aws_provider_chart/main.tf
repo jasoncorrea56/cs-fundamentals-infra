@@ -12,4 +12,10 @@ resource "helm_release" "aws_provider" {
     name  = "fullnameOverride"
     value = "csi-provider-aws"
   }
+
+  # Do NOT install the CSI driver as a dependency
+  set {
+    name  = "secrets-store-csi-driver.install"
+    value = "false"
+  }
 }

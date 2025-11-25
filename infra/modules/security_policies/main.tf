@@ -1,12 +1,15 @@
 # PSA labels on namespace (restricted)
 # Use kubernetes_manifest to avoid drift on the existing "default" ns.
 resource "kubernetes_manifest" "psa_labels" {
+  count = var.manage_namespace ? 1 : 0
+
   manifest = {
     apiVersion = "v1"
     kind       = "Namespace"
     metadata = {
       name = var.namespace
       labels = {
+        "kubernetes.io/metadata.name"                = var.namespace
         "pod-security.kubernetes.io/enforce"         = "restricted"
         "pod-security.kubernetes.io/enforce-version" = "latest"
         "pod-security.kubernetes.io/warn"            = "restricted"
@@ -69,12 +72,12 @@ resource "kubernetes_manifest" "rb_view_sa" {
     apiVersion = "rbac.authorization.k8s.io/v1"
     kind       = "RoleBinding"
     metadata = {
-      name      = "viewer-csf-app"
+      name      = "viewer-${var.namespace}-app"
       namespace = var.namespace
     }
     subjects = [{
       kind      = "ServiceAccount"
-      name      = "csf-app"
+      name      = var.service_account
       namespace = var.namespace
     }]
     roleRef = {

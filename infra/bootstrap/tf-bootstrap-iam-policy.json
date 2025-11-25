@@ -64,11 +64,17 @@
 				"ec2:DeleteRoute",
 				"ec2:AllocateAddress",
 				"ec2:ReleaseAddress",
-				"ec2:DescribeAddresses",
 				"ec2:CreateNatGateway",
 				"ec2:DeleteNatGateway",
 				"ec2:CreateTags",
 				"ec2:DeleteTags",
+				"ec2:DisassociateAddress",
+				"ec2:CreateSecurityGroup",
+				"ec2:RevokeSecurityGroupEgress",
+				"ec2:DeleteSecurityGroup",
+				"ec2:AuthorizeSecurityGroupIngress",
+				"ec2:AuthorizeSecurityGroupEgress",
+				"ec2:RevokeSecurityGroupIngress",
 				"route53:CreateHostedZone",
 				"route53:GetHostedZone",
 				"route53:ListHostedZones",
@@ -104,11 +110,14 @@
 				"elasticloadbalancing:DescribeLoadBalancers",
 				"elasticloadbalancing:DescribeLoadBalancerAttributes",
 				"elasticloadbalancing:DescribeTags",
+				"elasticloadbalancing:DescribeTargetHealth",
+				"elasticloadbalancing:DeleteLoadBalancer",
 				"iam:CreateRole",
 				"iam:DeleteRole",
 				"iam:GetRole",
 				"iam:PassRole",
 				"iam:TagRole",
+				"iam:ListRoles",
 				"iam:CreatePolicy",
 				"iam:DeletePolicy",
 				"iam:GetPolicy",
@@ -138,6 +147,7 @@
 				"logs:ListTagsForResource",
 				"logs:PutRetentionPolicy",
 				"logs:CreateLogGroup",
+				"logs:DeleteLogGroup",
 				"cloudwatch:DescribeAlarms",
 				"cloudwatch:ListTagsForResource",
 				"cloudwatch:PutMetricAlarm",
@@ -150,7 +160,8 @@
 				"SNS:DeleteTopic",
 				"SNS:Subscribe",
 				"SNS:Unsubscribe",
-				"SNS:GetSubscriptionAttributes"
+				"SNS:GetSubscriptionAttributes",
+				"secretsmanager:ListSecrets"
 			],
 			"Resource": "*"
 		},
@@ -175,7 +186,7 @@
 				"eks:ListAddons",
 				"eks:DescribeCluster"
 			],
-			"Resource": "arn:aws:eks:us-west-2:948319129176:cluster/csf-cluster"
+			"Resource": "arn:aws:eks:us-west-2:948319129176:cluster/csf-*"
 		},
 		{
 			"Effect": "Allow",
@@ -186,7 +197,7 @@
 				"eks:DescribeUpdate",
 				"eks:ListTagsForResource"
 			],
-			"Resource": "arn:aws:eks:us-west-2:948319129176:addon/csf-cluster/*"
+			"Resource": "arn:aws:eks:us-west-2:948319129176:addon/csf-*/*"
 		},
 		{
 			"Effect": "Allow",
@@ -231,6 +242,21 @@
 			"Resource": [
 				"arn:aws:iam::948319129176:role/csf-cloudwatch-agent-role",
 				"arn:aws:iam::948319129176:role/csf-fluent-bit-role"
+			]
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"secretsmanager:CreateSecret",
+				"secretsmanager:DeleteSecret",
+				"secretsmanager:DescribeSecret",
+				"secretsmanager:GetResourcePolicy",
+				"secretsmanager:GetSecretValue",
+				"secretsmanager:PutSecretValue",
+				"secretsmanager:RestoreSecret"
+			],
+			"Resource": [
+				"arn:aws:secretsmanager:us-west-2:948319129176:secret:csf/*"
 			]
 		}
 	]
