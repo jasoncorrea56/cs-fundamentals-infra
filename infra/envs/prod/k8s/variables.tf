@@ -1,7 +1,7 @@
 variable "environment" {
   description = "Environment name (e.g., dev, prod, qa)"
   type        = string
-  default     = "dev"
+  default     = "prod"
 }
 
 variable "app_name" {
@@ -11,6 +11,11 @@ variable "app_name" {
 
 variable "app_namespace" {
   description = "Namespace for the app being hosted (i.e. csf)"
+  type        = string
+}
+
+variable "app_domain" {
+  description = "FQDN for the app (i.e. csf.jasoncorrea.dev)"
   type        = string
 }
 
@@ -56,18 +61,18 @@ variable "cluster_name" {
 variable "eks_cluster_role_name" {
   description = "IAM role name for the EKS control plane"
   type        = string
-  default     = "csf-dev-eks-cluster-role"
+  default     = "csf-prod-eks-cluster-role"
 }
 
 variable "eks_node_role_name" {
   description = "IAM role name for the EKS node group"
   type        = string
-  default     = "csf-dev-eks-node-role"
+  default     = "csf-prod-eks-node-role"
 }
 
 variable "kubernetes_version" {
   type        = string
-  description = "EKS minor version, i.e. 1.34"
+  description = "EKS minor version (i.e. 1.34)"
   default     = "1.34"
 }
 
@@ -124,4 +129,23 @@ variable "runtime_alert_email" {
 variable "alb_allowed_cidrs" {
   description = "CIDR blocks allowed to reach the public ALB for this env"
   type        = list(string)
+}
+
+variable "secret_sync_enable" {
+  description = "Whether to create the SecretProviderClass + synced secret (see bootstrap notes)."
+  type        = bool
+  # IMPORTANT: from a totally clean cluster, this should start as false
+  default = false
+}
+
+variable "acm_certificate_arn" {
+  description = "ACM certificate ARN to use for the prod ingress (typically the wildcard cert from shared)."
+  type        = string
+  default     = ""
+}
+
+variable "app_chart_enable" {
+  description = "Enable Helm-managed app deployment (disable for first bootstrap when secrets are not ready)."
+  type        = bool
+  default     = true
 }

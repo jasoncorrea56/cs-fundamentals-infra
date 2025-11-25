@@ -14,6 +14,11 @@ variable "app_namespace" {
   type        = string
 }
 
+variable "app_domain" {
+  description = "FQDN for the app (i.e. csf.jasoncorrea.dev)"
+  type        = string
+}
+
 variable "github_repo" {
   description = "Github repo for the app (i.e. cs-fundamentals)"
   type        = string
@@ -42,7 +47,7 @@ variable "db_url" {
 }
 
 variable "zone_name" {
-  description = "Hosted zone name (i.e. jasoncorrea.dev.)"
+  description = "Hosted zone name (i.e. jasoncorrea.dev)"
   type        = string
   default     = null
 }
@@ -54,20 +59,20 @@ variable "cluster_name" {
 }
 
 variable "eks_cluster_role_name" {
-  description = "IAM role name for the EKS control plane (dev)."
+  description = "IAM role name for the EKS control plane"
   type        = string
   default     = "csf-dev-eks-cluster-role"
 }
 
 variable "eks_node_role_name" {
-  description = "IAM role name for the EKS node group (dev)."
+  description = "IAM role name for the EKS node group"
   type        = string
   default     = "csf-dev-eks-node-role"
 }
 
 variable "kubernetes_version" {
   type        = string
-  description = "EKS minor version, i.e. 1.34"
+  description = "EKS minor version (i.e. 1.34)"
   default     = "1.34"
 }
 
@@ -115,7 +120,6 @@ variable "enable_runtime_alerts" {
   default     = false
 }
 
-# infra/envs/prod/variables.tf
 variable "runtime_alert_email" {
   description = "Optional email address for receiving runtime alerts via SNS."
   type        = string
@@ -132,4 +136,16 @@ variable "secret_sync_enable" {
   type        = bool
   # IMPORTANT: from a totally clean cluster, this should start as false
   default = false
+}
+
+variable "acm_certificate_arn" {
+  description = "ACM certificate ARN to use for the prod ingress (typically the wildcard cert from shared)."
+  type        = string
+  default     = ""
+}
+
+variable "app_chart_enable" {
+  description = "Enable Helm-managed app deployment (disable for first bootstrap when secrets are not ready)."
+  type        = bool
+  default     = true
 }

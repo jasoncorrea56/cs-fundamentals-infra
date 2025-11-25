@@ -9,5 +9,9 @@ resource "aws_secretsmanager_secret" "this" {
 
 resource "aws_secretsmanager_secret_version" "v" {
   secret_id     = aws_secretsmanager_secret.this.id
-  secret_string = jsonencode({ db_url = var.db_url })
+
+  # Store as JSON with a DB_URL field so CSI/jmesPath can target it explicitly
+  secret_string = jsonencode({
+    DB_URL = var.db_url
+  })
 }

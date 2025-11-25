@@ -30,11 +30,18 @@ locals {
   ]
 }
 
-resource "kubernetes_config_map_v1" "aws_auth" {
+resource "kubernetes_config_map_v1_data" "aws_auth" {
   metadata {
     name      = "aws-auth"
     namespace = "kube-system"
   }
+
+  # Tell Kubernetes "Terraform is the field manager for these keys"
+  field_manager = "terraform"
+
+  # Explicitly take ownership of data fields (like mapRoles) even if another
+  # manager created them previously.
+  force = true
 
   data = merge(
     {
@@ -134,7 +141,7 @@ resource "kubernetes_manifest" "github_deployer_clusterrole" {
     ]
   }
 
-  depends_on = [kubernetes_config_map_v1.aws_auth]
+  depends_on = [kubernetes_config_map_v1_data.aws_auth]
 }
 
 ############################################################

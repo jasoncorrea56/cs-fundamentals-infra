@@ -27,7 +27,7 @@ output "github_actions_role_arn" {
 }
 
 output "alb_sg_id" {
-  description = "Security group used by the dev ALB"
+  description = "Security group used by the prod ALB"
   value       = module.alb_sg.security_group_id
 }
 

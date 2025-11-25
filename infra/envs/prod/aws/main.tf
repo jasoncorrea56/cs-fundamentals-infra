@@ -92,7 +92,7 @@ module "externaldns_irsa" {
 module "db_secret" {
   source = "../../../modules/asm_secret"
 
-  # Per-env secret name (i.e. csf/dev/db-url)
+  # Per-env secret name (i.e. csf/prod/db-url)
   name   = "${local.app_ns}/${local.environment}/db-url"
   db_url = var.db_url
 }

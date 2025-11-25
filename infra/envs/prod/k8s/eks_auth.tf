@@ -1,5 +1,5 @@
 ############################################################
-# EKS aws-auth & GitHub deployer RBAC
+# EKS aws-auth & GitHub deployer RBAC (prod/k8s layer)
 #
 # - Maps:
 #     - Worker node role  -> system:nodes (required for node auth)
@@ -10,7 +10,6 @@
 #     - Creating the smoke-test Job
 ############################################################
 
-# Derive optional console admins from tfvars
 locals {
   # Roles (i.e. SSO assumed roles) -> system:masters
   admin_maproles = [
@@ -31,36 +30,36 @@ locals {
   ]
 }
 
-resource "kubernetes_config_map_v1" "aws_auth" {
+resource "kubernetes_config_map_v1_data" "aws_auth" {
   metadata {
     name      = "aws-auth"
     namespace = "kube-system"
   }
 
-  # Merge in optional admins & only emit mapUsers if provided.
+  # Tell Kubernetes "Terraform is the field manager for these keys"
+  field_manager = "terraform"
+
+  # Explicitly take ownership of data fields (like mapRoles) even if another
+  # manager created them previously.
+  force = true
+
   data = merge(
     {
-      # NOTE:
-      # - If aws-auth already exists, import it before apply:
-      #     terraform import kubernetes_config_map_v1.aws_auth kube-system/aws-auth
-      #   then reconcile mapRoles to avoid clobbering.
       mapRoles = yamlencode(concat([
-        # Worker nodes: allow them to join the cluster
         {
-          rolearn  = aws_iam_role.eks_node.arn
+          # Worker nodes (from prod/aws remote state)
+          rolearn  = data.terraform_remote_state.prod_aws.outputs.eks_node_role_arn
           username = "system:node:{{EC2PrivateDNSName}}"
           groups = [
             "system:bootstrappers",
             "system:nodes",
           ]
         },
-        # GitHub Actions deploy role: maps to "github-deployer" group
         {
-          rolearn  = aws_iam_role.gha_deployer.arn
+          # GitHub deployer IAM role (from prod/aws remote state)
+          rolearn  = data.terraform_remote_state.prod_aws.outputs.github_actions_role_arn
           username = "github-deployer"
-          groups = [
-            "github-deployer",
-          ]
+          groups   = ["github-deployer"]
         },
       ], local.admin_maproles))
     },
@@ -70,9 +69,7 @@ resource "kubernetes_config_map_v1" "aws_auth" {
   )
 
   depends_on = [
-    module.eks,
-    aws_iam_role.eks_node,
-    aws_iam_role.gha_deployer,
+    data.terraform_remote_state.prod_aws,
   ]
 }
 
@@ -144,7 +141,7 @@ resource "kubernetes_manifest" "github_deployer_clusterrole" {
     ]
   }
 
-  depends_on = [kubernetes_config_map_v1.aws_auth]
+  depends_on = [kubernetes_config_map_v1_data.aws_auth]
 }
 
 ############################################################

@@ -46,6 +46,192 @@ Set Repository Variables:
 - APP_DOMAIN=csf.jasoncorrea.dev
 - ACM_CERT_ARN=<ACM Certificate ARN returned from `terraform apply`>
 
+## 🚀 Environment Bootstrap Guide (Dev/Prod)
+
+This section describes the **three-phase bootstrap process** used to bring up a fully functional environment (VPC, EKS, ALB Ingress, CSI/IRSA, ExternalDNS, and application) from clean state.  
+The process is **repeatable**, **idempotent**, and safe for both new and existing environments.
+
+### 1. Overview
+
+Each environment (`dev`, `prod`, etc.) is split into two Terraform stacks:
+
+```bash
+envs/<name>/aws/   > AWS infrastructure (VPC, EKS, IAM, Route53, ASM)
+envs/<name>/k8s/   > Kubernetes-side resources (controllers, CSI, app)
+```
+
+The bootstrap must be applied in phases because certain components (notably the Secrets Store CSI Provider and `SecretProviderClass`) require the cluster to exist before creation, and the application requires secrets to exist before pods can start.
+
+### 2. Phase Summary
+
+| Phase | Applies Stack | Flags | Purpose |
+|------|---------------|-------|---------|
+| **Phase 1** | `envs/<env>/aws` | n/a | Build all AWS infra: VPC, EKS, IAM, ASM secret, Route53 hosted zone. |
+| **Phase 2a** | `envs/<env>/k8s` | `secret_sync_enable = false`<br>`app_chart_enable = false` | Install cluster addons only: ALB controller, ExternalDNS, metrics-server, autoscaler, CSI driver/providers. |
+| **Phase 2b** | `envs/<env>/k8s` | `secret_sync_enable = true`<br>`app_chart_enable = false` | Create IRSA SA + SecretProviderClass + bootstrap Secret (`csf-db` with placeholder key). |
+| **Phase 2c** | `envs/<env>/k8s` | `secret_sync_enable = true`<br>`app_chart_enable = true` | Deploy the application Helm chart - pods start cleanly and CSI overwrites the secret value. |
+
+### 3. Detailed Bootstrap Steps
+
+#### Phase 1 — Create AWS Infrastructure
+
+From `infra/envs/<env>/aws`:
+
+```bash
+terraform init -backend-config=backend.hcl -reconfigure
+terraform apply -auto-approve
+```
+
+This creates VPC, EKS, IAM roles, ASM secret, and Route53 NS.
+
+#### Phase 2a — Install Kubernetes Controllers
+
+Set:
+
+```bash
+secret_sync_enable = false
+app_chart_enable   = false
+```
+
+Apply:
+
+```bash
+terraform apply -auto-approve
+```
+
+Installs ALB, ExternalDNS, metrics-server, autoscaler, CSI, etc.
+
+#### Phase 2b — Enable Secret Sync
+
+Set:
+
+```bash
+secret_sync_enable = true
+app_chart_enable   = false
+```
+
+Apply:
+
+```bash
+terraform apply -auto-approve
+```
+
+Creates SecretProviderClass + placeholder secret.
+
+#### Phase 2c — Deploy the App
+
+Set:
+
+```bash
+secret_sync_enable = true
+app_chart_enable   = true
+```
+
+Apply:
+
+```bash
+terraform apply -auto-approve
+```
+
+Deploys app + ingress + ALB + DNS. CSI overwrites secret value.
+
+#### Post-Deployment: Deploy (Non-Prod)
+
+After applying aws/ get the `alb_sg_id` from the outputs
+
+```bash
+alb_sg_id = "sg-09ba3144364de3db6"
+```
+
+Plug it into cs-fundamentals/helm/values-dev.yaml:ingress.annotations
+
+```yaml
+alb.ingress.kubernetes.io/security-groups: "sg-09ba3144364de3db6"
+```
+
+Point KubeConfig to Dev
+
+```bash
+aws eks update-kubeconfig --name csf-dev-cluster --region us-west-2
+```
+
+Upgrade Helm with build in ECR
+
+```bash
+helm upgrade --install csf ./helm \
+  -n csf \
+  -f helm/values.yaml \
+  --set image.repository="948319129176.dkr.ecr.us-west-2.amazonaws.com/cs-fundamentals" \
+  --set image.tag="0.7.4-48d81fc" \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=csf-app \
+  --set "ingress.enabled=true" \
+  --set "ingress.className=alb" \
+  --set "ingress.hosts[0].host=csf-dev.jasoncorrea.dev" \
+  --set "ingress.hosts[0].paths[0].path=/" \
+  --set "ingress.hosts[0].paths[0].pathType=Prefix"
+```
+
+#### Post-Deployment: Deploy (Prod)
+
+Point KubeConfig to Prod
+
+```bash
+aws eks update-kubeconfig --name csf-prod-cluster --region us-west-2
+```
+
+Upgrade Helm with build in ECR
+
+```bash
+helm upgrade --install csf ./helm \
+  -n csf \
+  -f helm/values-prod.yaml \
+  --set image.repository="948319129176.dkr.ecr.us-west-2.amazonaws.com/cs-fundamentals" \
+  --set image.tag="0.7.4" \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=csf-app \
+  --set "ingress.enabled=true" \
+  --set "ingress.className=alb" \
+  --set "ingress.hosts[0].host=csf.jasoncorrea.dev" \
+  --set "ingress.hosts[0].paths[0].path=/" \
+  --set "ingress.hosts[0].paths[0].pathType=Prefix"
+```
+
+#### Post-Deployment: Flush DNS Cache
+
+Flush the local DNS cache:
+
+```bash
+sudo dscacheutil -flushcache
+sudo killall -HUP mDNSResponder
+```
+
+### 4. Rebuild Instructions
+
+To rebuild k8s only:
+
+```bash
+cd infra/envs/<env>/k8s
+terraform destroy
+# Then repeat Phases 2a, 2b, & 2c
+```
+
+To rebuild AWS + k8s:
+
+```bash
+cd infra/envs/<env>/k8s
+terraform destroy
+cd ../aws
+terraform destroy
+# Then run Phases 1, 2a, 2b, & 2c
+```
+
+### 5. Notes
+
+- No real secrets enter Terraform state.
+- Secret rotation handled via ASM + CSI.
+- Fully automated ALB and DNS provisioning via Terraform + ExternalDNS.
+
 ## Workflow
 
 1. Update Terraform configuration

@@ -1,5 +1,5 @@
 bucket         = "jasoncorrea56-csfundamentals-tfstate-prod-us-west-2"
 dynamodb_table = "jasoncorrea56-csfundamentals-tf-locks-prod"
-key            = "envs/dev/aws/terraform.tfstate"
+key            = "envs/prod/aws/terraform.tfstate"
 region         = "us-west-2"
 encrypt        = true

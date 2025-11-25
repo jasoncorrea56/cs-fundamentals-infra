@@ -14,11 +14,6 @@ variable "app_namespace" {
   type        = string
 }
 
-variable "app_domain" {
-  description = "FQDN for the app (i.e. csf.jasoncorrea.dev)"
-  type        = string
-}
-
 variable "github_repo" {
   description = "Github repo for the app (i.e. cs-fundamentals)"
   type        = string
@@ -47,7 +42,7 @@ variable "db_url" {
 }
 
 variable "zone_name" {
-  description = "Hosted zone name (i.e. jasoncorrea.dev.)"
+  description = "Hosted zone name (i.e. jasoncorrea.dev)"
   type        = string
   default     = null
 }
@@ -59,15 +54,15 @@ variable "cluster_name" {
 }
 
 variable "eks_cluster_role_name" {
-  description = "IAM role name for the EKS control plane (prod keeps existing name)."
+  description = "IAM role name for the EKS control plane"
   type        = string
-  default     = "csf-eks-cluster-role"
+  default     = "csf-prod-eks-cluster-role"
 }
 
 variable "eks_node_role_name" {
-  description = "IAM role name for the EKS node group (prod keeps existing name)."
+  description = "IAM role name for the EKS node group"
   type        = string
-  default     = "csf-eks-node-role"
+  default     = "csf-prod-eks-node-role"
 }
 
 variable "kubernetes_version" {
@@ -120,9 +115,13 @@ variable "enable_runtime_alerts" {
   default     = false
 }
 
-# infra/envs/prod/variables.tf
 variable "runtime_alert_email" {
   description = "Optional email address for receiving runtime alerts via SNS."
   type        = string
   default     = ""
+}
+
+variable "alb_allowed_cidrs" {
+  description = "CIDR blocks allowed to reach the public ALB for this env"
+  type        = list(string)
 }
