@@ -1,24 +1,11 @@
-terraform {
-  required_version = ">= 1.6.0"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
-}
-
-provider "aws" {
-  region = var.region
-}
-
 locals {
-  # Example: jasoncorrea56-csfundamentals-tfstate-prod-us-west-2
+  # Example: jasoncorrea56-cs-fundamentals-tfstate-prod-us-west-2
   bucket_name = "${var.org}-${var.project}-tfstate-${var.env}-${var.region}"
 }
 
 resource "aws_s3_bucket" "tfstate" {
-  bucket = local.bucket_name
+  bucket        = local.bucket_name
+  force_destroy = true
 
   tags = {
     Project = var.project
@@ -99,12 +86,4 @@ resource "aws_dynamodb_table" "tf_locks" {
     Owner   = var.owner
     Purpose = "terraform-locks"
   }
-}
-
-output "tfstate_bucket" {
-  value = aws_s3_bucket.tfstate.bucket
-}
-
-output "tf_locks_table" {
-  value = aws_dynamodb_table.tf_locks.name
 }

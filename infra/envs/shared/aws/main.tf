@@ -106,7 +106,7 @@ resource "aws_iam_role_policy_attachment" "gha_deployer_attach" {
 # ------------------------------------------------------------
 
 module "ecr_csf" {
-  source = "../../modules/ecr"
+  source = "../../../modules/ecr"
   name   = local.app_name
 }
 
@@ -115,7 +115,7 @@ module "ecr_csf" {
 # ------------------------------------------------------------
 
 module "acm_csf" {
-  source = "../../modules/acm_cert"
+  source = "../../../modules/acm_cert"
 
   # Wildcard for all app environments (dev/prod/qa/etc.)
   domain_name = "*.${aws_route53_zone.jasoncorrea.name}"

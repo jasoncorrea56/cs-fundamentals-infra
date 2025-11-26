@@ -41,7 +41,7 @@ variable "allow_https_egress" {
 }
 
 variable "ingress_cidrs" {
-  description = "CIDRs allowed to reach the app (e.g., VPC CIDR for ALB target-type=ip)"
+  description = "CIDRs allowed to reach the app (i.e., VPC CIDR for ALB target-type=ip)"
   type        = list(string)
   default     = []
 }
