@@ -27,7 +27,7 @@ provider "aws" {
 data "terraform_remote_state" "prod_aws" {
   backend = "s3"
   config = {
-    bucket       = "jasoncorrea56-csfundamentals-tfstate-prod-us-west-2"
+    bucket       = "jasoncorrea56-cs-fundamentals-tfstate-prod-us-west-2"
     key          = "envs/prod/aws/terraform.tfstate"
     region       = "us-west-2"
     use_lockfile = true
@@ -37,10 +37,10 @@ data "terraform_remote_state" "prod_aws" {
 data "terraform_remote_state" "shared" {
   backend = "s3"
 
-  # Config from infra/envs/shared/backend.hcl
+  # Config from infra/envs/shared/aws/backend.hcl
   config = {
-    bucket       = "jasoncorrea56-csfundamentals-tfstate-prod-us-west-2"
-    key          = "shared/terraform.tfstate"
+    bucket       = "jasoncorrea56-cs-fundamentals-tfstate-prod-us-west-2"
+    key          = "envs/shared/aws/terraform.tfstate"
     region       = "us-west-2"
     use_lockfile = true
     encrypt      = true

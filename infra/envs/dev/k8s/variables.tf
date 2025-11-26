@@ -1,5 +1,5 @@
 variable "environment" {
-  description = "Environment name (e.g., dev, prod, qa)"
+  description = "Environment name (i.e., dev, prod, qa)"
   type        = string
   default     = "dev"
 }
@@ -78,7 +78,7 @@ variable "kubernetes_version" {
 
 # --- Principals to grant cluster-admin (system:masters) via aws-auth ---
 variable "console_admin_role_arns" {
-  description = "List of IAM role ARNs (e.g., SSO/assumed roles) to map into system:masters"
+  description = "List of IAM role ARNs (i.e., SSO/assumed roles) to map into system:masters"
   type        = list(string)
   default     = []
 }
@@ -138,14 +138,14 @@ variable "secret_sync_enable" {
   default = false
 }
 
-variable "acm_certificate_arn" {
-  description = "ACM certificate ARN to use for the prod ingress (typically the wildcard cert from shared)."
-  type        = string
-  default     = ""
-}
-
 variable "app_chart_enable" {
   description = "Enable Helm-managed app deployment (disable for first bootstrap when secrets are not ready)."
   type        = bool
   default     = true
+}
+
+variable "image_tag" {
+  type        = string
+  description = "Container image tag to deploy in dev (i.e. 0.7.5-<sha7>)."
+  default     = "0.7.5-2c5e092"
 }

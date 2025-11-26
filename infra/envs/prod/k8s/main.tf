@@ -122,7 +122,7 @@ module "security_policies" {
   app_port        = 8080
   ingress_cidrs   = [data.terraform_remote_state.prod_aws.outputs.vpc_cidr_block]
 
-  # Prod: namespace is app/CI-managed, so don't try to create/destroy it from TF
+  # Prod: namespace is app/CI-managed
   manage_namespace = false
 
   app_selector = {
@@ -159,10 +159,10 @@ module "app_chart" {
   enable     = var.app_chart_enable
   chart_path = abspath("${path.module}/../../../../../${local.app_name}/helm")
 
-  # Prod uses the prod values file (public ingress/TLS).
+  # Prod uses the prod values file (public ingress/TLS)
   values_file = abspath("${path.module}/../../../../../${local.app_name}/helm/values-prod.yaml")
 
-  acm_certificate_arn = var.acm_certificate_arn
+  acm_certificate_arn = data.terraform_remote_state.shared.outputs.acm_csf_arn
   namespace           = local.app_namespace
   release_name        = local.app_namespace
 
@@ -170,14 +170,16 @@ module "app_chart" {
     var.app_domain,
   ]
 
-  # Optional: override image tag/repo at apply-time without touching values files
   image_overrides = [
-    # { name = "image.repository", value = "948319129176.dkr.ecr.us-west-2.amazonaws.com/${local.app_name}" },
-    # { name = "image.tag",        value = "v0.7.2" },
+    {
+      name  = "image.tag"
+      value = var.image_tag
+    }
   ]
 
   depends_on = [
     module.metrics_server_chart,
     module.secret_sync,
+    module.alb_controller_chart,
   ]
 }

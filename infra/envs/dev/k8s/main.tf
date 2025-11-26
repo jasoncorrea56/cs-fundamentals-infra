@@ -122,8 +122,7 @@ module "security_policies" {
   app_port        = 8080
   ingress_cidrs   = [data.terraform_remote_state.dev_aws.outputs.vpc_cidr_block]
 
-  # Dev: namespace is app/CI-managed; this flag only controls whether the
-  # security_policies module itself tries to create/destroy it.
+  # Dev: namespace is app/CI-managed
   manage_namespace = false
 
   app_selector = {
@@ -156,26 +155,27 @@ module "app_chart" {
   source      = "../../../modules/app_chart"
   environment = local.environment
 
-  # For dev we now let TF manage the app Helm release as well,
-  # controlled by a flag just like prod.
+  # Allow env-specific bootstrapping control.
   enable     = var.app_chart_enable
   chart_path = abspath("${path.module}/../../../../../${local.app_name}/helm")
 
-  # Dev uses the base values file.
+  # Dev uses the dev values file (allowlist ingress/TLS)
   values_file = abspath("${path.module}/../../../../../${local.app_name}/helm/values-dev.yaml")
 
-  acm_certificate_arn = var.acm_certificate_arn
+  acm_certificate_arn = data.terraform_remote_state.shared.outputs.acm_csf_arn
   namespace           = local.app_namespace
   release_name        = local.app_namespace
 
-  # Dev ingress host (e.g. csf-dev.jasoncorrea.dev)
+  # Dev ingress host (i.e. csf-dev.jasoncorrea.dev)
   ingress_hosts = [
     var.app_domain,
   ]
 
   image_overrides = [
-    # { name = "image.repository", value = "948319129176.dkr.ecr.us-west-2.amazonaws.com/${local.app_name}" },
-    # { name = "image.tag",        value = "0.7.4-48d81fc" },
+    {
+      name  = "image.tag"
+      value = var.image_tag
+    }
   ]
 
   depends_on = [
