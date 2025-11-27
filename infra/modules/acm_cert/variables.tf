@@ -23,5 +23,5 @@ variable "region" {
 variable "enable_validation" {
   description = "Whether to wait for ACM DNS validation (hangs until domain is delegated)"
   type        = bool
-  default     = false
+  default     = true
 }

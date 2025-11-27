@@ -125,7 +125,7 @@ module "acm_csf" {
     aws_route53_zone.jasoncorrea.name,
   ]
 
-  enable_validation = true
+  enable_validation = var.enable_acm_validation
 
   # Shared owns the hosted zone, so we reference it directly
   hosted_zone_id = aws_route53_zone.jasoncorrea.zone_id
