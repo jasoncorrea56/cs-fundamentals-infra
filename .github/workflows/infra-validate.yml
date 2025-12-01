@@ -43,29 +43,35 @@ jobs:
           dirs=$(find infra -type f \
             \( -name 'main.tf' -o -name 'versions.tf' -o -name 'providers.tf' \) \
             -printf '%h\n' | sort -u)
+
           if [ -z "$dirs" ]; then
             echo "No terraform directories found under infra/"
             echo "dirs=" >> "$GITHUB_OUTPUT"
             exit 0
           fi
+
           echo "Validating the following directories:"
           echo "$dirs"
-          json=$(printf '%s\n' "$dirs" | jq -R . | jq -s .)
-          echo "dirs=$json" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "dirs<<EOF"
+            printf '%s\n' "$dirs"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Terraform init & validate
         if: steps.tf-dirs.outputs.dirs != ''
         run: |
           set -euo pipefail
-          dirs=$(echo '${{ steps.tf-dirs.outputs.dirs }}' | jq -r '.[]')
-          for d in $dirs; do
+
+          while IFS= read -r d; do
+            [ -z "$d" ] && continue
             echo "::group::Validating $d"
             cd "$GITHUB_WORKSPACE/$d"
-            # Init without touching real backends/state
             terraform init -backend=false -input=false -no-color
             terraform validate -no-color
             echo "::endgroup::"
-          done
+          done <<< "${{ steps.tf-dirs.outputs.dirs }}"
 
       - name: tfsec (Terraform security scan)
         uses: aquasecurity/tfsec-action@v1.0.3
