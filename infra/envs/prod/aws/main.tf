@@ -1,6 +1,8 @@
 locals {
   # Logical environment name (dev, qa, prod, etc.)
   environment = var.environment
+  region      = var.region
+
 
   # App and k8s config
   app_name = var.app_name
@@ -29,7 +31,10 @@ module "vpc" {
   name         = local.app_ns
   cidr_block   = "10.0.0.0/16"
   cluster_name = local.cluster_name
-  azs          = ["us-west-2a", "us-west-2b"]
+  azs          = [
+    "${local.region}a", 
+    "${local.region}b"
+  ]
   environment  = local.environment
 
   tags = local.common_tags

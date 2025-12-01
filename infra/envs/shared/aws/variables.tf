@@ -19,7 +19,13 @@ variable "github_owner" {
 }
 
 variable "enable_acm_validation" {
+  description = "Controls whether ACM DNS validation should be performed (set to false for phase 1 of a fresh domain bootstrap, then true for phase 2)."
   type        = bool
   default     = true
-  description = "Controls whether ACM DNS validation should be performed (set to false for phase 1 of a fresh domain bootstrap, then true for phase 2)."
+}
+
+variable "region" {
+  description = "AWS region to deploy into"
+  type        = string
+  default     = "us-west-2"
 }

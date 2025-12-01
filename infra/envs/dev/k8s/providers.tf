@@ -20,16 +20,16 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-west-2"
+  region = "${var.region}"
 }
 
 # Read cluster info from the dev/aws stack
 data "terraform_remote_state" "dev_aws" {
   backend = "s3"
   config = {
-    bucket       = "jasoncorrea56-cs-fundamentals-tfstate-prod-us-west-2"
+    bucket       = "jasoncorrea56-cs-fundamentals-tfstate-prod-${var.region}"
     key          = "envs/dev/aws/terraform.tfstate"
-    region       = "us-west-2"
+    region       = "${var.region}"
     use_lockfile = true
   }
 }
@@ -39,9 +39,9 @@ data "terraform_remote_state" "shared" {
 
   # Config from infra/envs/shared/aws/backend.hcl
   config = {
-    bucket       = "jasoncorrea56-cs-fundamentals-tfstate-prod-us-west-2"
+    bucket       = "jasoncorrea56-cs-fundamentals-tfstate-prod-${var.region}"
     key          = "envs/shared/aws/terraform.tfstate"
-    region       = "us-west-2"
+    region       = "${var.region}"
     use_lockfile = true
     encrypt      = true
   }
