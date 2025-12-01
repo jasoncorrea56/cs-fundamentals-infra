@@ -51,7 +51,7 @@ jobs:
           echo "Validating the following directories:"
           echo "$dirs"
           json=$(printf '%s\n' "$dirs" | jq -R . | jq -s .)
-          echo "dirs=$json" >> "$GITHUB_OUTPUT
+          echo "dirs=$json" >> "$GITHUB_OUTPUT"
 
       - name: Terraform init & validate
         if: steps.tf-dirs.outputs.dirs != ''
