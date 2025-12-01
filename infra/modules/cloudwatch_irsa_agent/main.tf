@@ -24,6 +24,13 @@ resource "aws_iam_role" "this" {
       }
     }]
   })
+
+  tags = merge(
+    var.tags,
+    {
+      Name = var.role_name
+    }
+  )
 }
 
 # Least-privileged policy for CloudWatch Agent Container Insights (metrics + infra describes)

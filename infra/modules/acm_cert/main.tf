@@ -12,32 +12,38 @@ resource "aws_acm_certificate" "this" {
   lifecycle {
     create_before_destroy = true
   }
+
+  tags = merge(
+    var.tags,
+    {
+      Name = replace(var.domain_name, "*", "wildcard")
+    }
+  )
 }
 
+# Turn ACM's set(domain_validation_options) into an indexable list
+locals {
+  dvo_list = tolist(aws_acm_certificate.this.domain_validation_options)
+}
+
+# Always create the Route53 validation record
 resource "aws_route53_record" "validation" {
-  for_each = var.enable_validation ? {
-    # Group domain_validation_options by resource_record_name.
-    # This prevents duplicate key errors when multiple domains
-    # (i.e. wildcard + apex) share the same ACM validation CNAME.
-    for dvo in aws_acm_certificate.this.domain_validation_options :
-    dvo.resource_record_name => dvo...
-  } : {}
-
   zone_id = var.hosted_zone_id
+  name    = local.dvo_list[0].resource_record_name
+  type    = local.dvo_list[0].resource_record_type
+  ttl     = 60
 
-  # each.value is now a list of dvo objects (grouped by record name).
-  # They are functionally identical, so we use the first one.
-  name            = each.value[0].resource_record_name
-  type            = each.value[0].resource_record_type
-  ttl             = 60
-  records         = [each.value[0].resource_record_value]
-  allow_overwrite = true
+  records = [
+    local.dvo_list[0].resource_record_value,
+  ]
 }
 
+# Only wait for validation when enabled
 resource "aws_acm_certificate_validation" "this" {
-  count                   = var.enable_validation ? 1 : 0
-  provider                = aws.acm
-  certificate_arn         = aws_acm_certificate.this.arn
-  validation_record_fqdns = [for r in aws_route53_record.validation : r.fqdn]
-}
+  count           = var.enable_validation ? 1 : 0
+  certificate_arn = aws_acm_certificate.this.arn
 
+  validation_record_fqdns = [
+    aws_route53_record.validation.fqdn,
+  ]
+}

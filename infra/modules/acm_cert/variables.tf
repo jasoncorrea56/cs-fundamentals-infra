@@ -23,5 +23,11 @@ variable "region" {
 variable "enable_validation" {
   description = "Whether to wait for ACM DNS validation (hangs until domain is delegated)"
   type        = bool
-  default     = false
+  default     = true
+}
+
+variable "tags" {
+  description = "Base tags to apply to resources in this module"
+  type        = map(string)
+  default     = {}
 }

@@ -1,5 +1,6 @@
 locals {
   environment     = var.environment
+  region          = var.region
   app_name        = var.app_name
   app_namespace   = var.app_namespace
   service_account = var.service_account
@@ -17,7 +18,7 @@ resource "kubernetes_namespace_v1" "app" {
 module "alb_controller_chart" {
   source       = "../../../modules/alb_controller_chart"
   cluster_name = local.cluster_name
-  region       = "us-west-2"
+  region       = "${local.region}"
   vpc_id       = data.terraform_remote_state.dev_aws.outputs.vpc_id
   role_arn     = data.terraform_remote_state.dev_aws.outputs.alb_controller_role_arn
 
@@ -66,7 +67,7 @@ module "secret_sync" {
   app_sa          = local.service_account
   spc_name        = "${local.app_namespace}-db-spc"
   k8s_secret_name = "${local.app_namespace}-db"
-  region          = "us-west-2"
+  region          = "${local.region}"
 
   role_arn   = data.terraform_remote_state.dev_aws.outputs.app_secrets_role_arn
   secret_arn = data.terraform_remote_state.dev_aws.outputs.db_secret_arn
@@ -84,7 +85,7 @@ module "secret_sync" {
 module "cluster_autoscaler" {
   source       = "../../../modules/cluster_autoscaler_chart"
   cluster_name = local.cluster_name
-  region       = "us-west-2"
+  region       = "${local.region}"
   role_arn     = data.terraform_remote_state.dev_aws.outputs.cluster_autoscaler_role_arn
   # chart_version   = "9.45.0" # Optional pin
 
@@ -96,7 +97,7 @@ module "cluster_autoscaler" {
 module "cloudwatch_agent_chart" {
   source       = "../../../modules/cloudwatch_agent_chart"
   cluster_name = local.cluster_name
-  region       = "us-west-2"
+  region       = "${local.region}"
   role_arn     = data.terraform_remote_state.dev_aws.outputs.cloudwatch_agent_role_arn
 
   depends_on = [
@@ -107,7 +108,7 @@ module "cloudwatch_agent_chart" {
 module "aws_for_fluent_bit_chart" {
   source       = "../../../modules/aws_for_fluent_bit_chart"
   cluster_name = local.cluster_name
-  region       = "us-west-2"
+  region       = "${local.region}"
   role_arn     = data.terraform_remote_state.dev_aws.outputs.fluent_bit_role_arn
 
   depends_on = [
@@ -122,8 +123,7 @@ module "security_policies" {
   app_port        = 8080
   ingress_cidrs   = [data.terraform_remote_state.dev_aws.outputs.vpc_cidr_block]
 
-  # Dev: namespace is app/CI-managed; this flag only controls whether the
-  # security_policies module itself tries to create/destroy it.
+  # Dev: namespace is app/CI-managed
   manage_namespace = false
 
   app_selector = {
@@ -156,26 +156,27 @@ module "app_chart" {
   source      = "../../../modules/app_chart"
   environment = local.environment
 
-  # For dev we now let TF manage the app Helm release as well,
-  # controlled by a flag just like prod.
+  # Allow env-specific bootstrapping control.
   enable     = var.app_chart_enable
   chart_path = abspath("${path.module}/../../../../../${local.app_name}/helm")
 
-  # Dev uses the base values file.
+  # Dev uses the dev values file (allowlist ingress/TLS)
   values_file = abspath("${path.module}/../../../../../${local.app_name}/helm/values-dev.yaml")
 
-  acm_certificate_arn = var.acm_certificate_arn
+  acm_certificate_arn = data.terraform_remote_state.shared.outputs.acm_csf_arn
   namespace           = local.app_namespace
   release_name        = local.app_namespace
 
-  # Dev ingress host (e.g. csf-dev.jasoncorrea.dev)
+  # Dev ingress host (i.e. csf-dev.jasoncorrea.dev)
   ingress_hosts = [
     var.app_domain,
   ]
 
   image_overrides = [
-    # { name = "image.repository", value = "948319129176.dkr.ecr.us-west-2.amazonaws.com/${local.app_name}" },
-    # { name = "image.tag",        value = "0.7.4-48d81fc" },
+    {
+      name  = "image.tag"
+      value = var.image_tag
+    }
   ]
 
   depends_on = [

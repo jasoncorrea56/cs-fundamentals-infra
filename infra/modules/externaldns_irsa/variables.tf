@@ -12,3 +12,9 @@ variable "role_name" {
   type    = string
   default = "csf-externaldns-role"
 }
+
+variable "tags" {
+  description = "Base tags to apply to resources in this module"
+  type        = map(string)
+  default     = {}
+}

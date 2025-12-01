@@ -270,13 +270,13 @@ cd infra/bootstrap
 terraform init
 terraform plan \
   -var org="jasoncorrea56" \
-  -var project="csfundamentals" \
+  -var project="cs-fundamentals" \
   -var env="prod" \
   -var region="us-west-2"
 
 terraform apply -auto-approve \
   -var org="jasoncorrea56" \
-  -var project="csfundamentals" \
+  -var project="cs-fundamentals" \
   -var env="prod" \
   -var region="us-west-2"
 ```
@@ -300,7 +300,7 @@ When tearing down the environment, after `terraform destroy` for the EKS infra i
 
 ```bash
 cd infra/bootstrap
-terraform destroy -auto-approve  -var org="jasoncorrea56" -var project="csfundamentals" -var env="prod" -var region="us-west-2"
+terraform destroy -auto-approve  -var org="jasoncorrea56" -var project="cs-fundamentals" -var env="prod" -var region="us-west-2"
 ```
 
 ## Usage

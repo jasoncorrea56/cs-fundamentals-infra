@@ -17,3 +17,15 @@ variable "github_owner" {
   description = "Owner of the Github repo (i.e. jasoncorrea56)"
   type        = string
 }
+
+variable "enable_acm_validation" {
+  description = "Controls whether ACM DNS validation should be performed (set to false for phase 1 of a fresh domain bootstrap, then true for phase 2)."
+  type        = bool
+  default     = true
+}
+
+variable "region" {
+  description = "AWS region to deploy into"
+  type        = string
+  default     = "us-west-2"
+}

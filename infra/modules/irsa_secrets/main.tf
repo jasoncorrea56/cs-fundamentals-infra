@@ -1,11 +1,13 @@
-data "aws_eks_cluster" "this" { name = var.cluster_name }
-
 # Secret ARN can vary by driver, account for truncated and full ARN
 locals {
   oidc            = replace(data.aws_eks_cluster.this.identity[0].oidc[0].issuer, "https://", "")
   arn_last6       = substr(var.secret_arn, max(0, length(var.secret_arn) - 6), 6)
   arn_suffix7     = "-${local.arn_last6}"
   secret_arn_base = trimsuffix(var.secret_arn, local.arn_suffix7)
+}
+
+data "aws_eks_cluster" "this" {
+  name = var.cluster_name
 }
 
 data "aws_iam_policy_document" "trust" {
@@ -31,6 +33,13 @@ data "aws_iam_policy_document" "trust" {
 resource "aws_iam_role" "this" {
   name               = var.role_name
   assume_role_policy = data.aws_iam_policy_document.trust.json
+
+  tags = merge(
+    var.tags,
+    {
+      Name = var.role_name
+    }
+  )
 }
 
 resource "aws_iam_policy" "allow_get" {
@@ -54,6 +63,13 @@ resource "aws_iam_policy" "allow_get" {
       }
     ]
   })
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "${var.role_name}-asm"
+    }
+  )
 }
 
 resource "aws_iam_role_policy_attachment" "attach" {

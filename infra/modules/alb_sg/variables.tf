@@ -12,3 +12,9 @@ variable "allowed_cidrs" {
   type        = list(string)
   description = "CIDRs allowed to reach the ALB (i.e. office/home/VPN IPs)"
 }
+
+variable "tags" {
+  description = "Base tags to apply to resources in this module"
+  type        = map(string)
+  default     = {}
+}

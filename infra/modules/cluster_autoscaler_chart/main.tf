@@ -28,12 +28,6 @@ resource "helm_release" "cluster_autoscaler" {
     value = var.role_arn
   }
 
-  # To force using a specific SA name:
-  # set {
-  #   name  = "rbac.serviceAccount.name"
-  #   value = "cluster-autoscaler-aws-cluster-autoscaler"
-  # }
-
   # Sane defaults for autoscaler behavior
   set {
     name  = "extraArgs.balance-similar-node-groups"

@@ -18,6 +18,13 @@ resource "aws_iam_role" "this" {
       Condition = { StringEquals = { "${local.oidc_url}:sub" = local.sa_sub } }
     }]
   })
+
+  tags = merge(
+    var.tags,
+    {
+      Name = var.role_name
+    }
+  )
 }
 
 # Minimal perms for Fluent Bit to ship logs to CloudWatch Logs
