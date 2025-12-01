@@ -122,13 +122,14 @@ resource "aws_dynamodb_table" "tf_locks" {
 # State Log Bucket Resources #
 ##############################
 
-# tfsec:ignore:aws-s3-enable-bucket-logging
-# Logging is enabled on the primary tfstate bucket and sent to this bucket.
-# We intentionally do NOT enable logging on the logs bucket itself to avoid
-# unnecessary log-of-logs complexity and cost.
+#tfsec:ignore:aws-s3-enable-bucket-logging
 resource "aws_s3_bucket" "tfstate_logs" {
   bucket        = "${local.bucket_name}-logs"
   force_destroy = true
+
+  # Logging is enabled on the primary tfstate bucket and sent to this bucket.
+  # We intentionally do NOT enable logging on the logs bucket itself to avoid
+  # unnecessary log-of-logs complexity and cost.
 
   tags = {
     Project = var.project
