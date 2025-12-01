@@ -3,12 +3,19 @@ resource "aws_eks_cluster" "this" {
   role_arn = var.cluster_role_arn
 
   version = var.kubernetes_version
+
   vpc_config {
     subnet_ids = concat(var.public_subnets, var.private_subnets)
   }
 
   enabled_cluster_log_types = ["api", "audit", "authenticator"]
-  tags                      = { Name = var.cluster_name }
+
+  tags = merge(
+    var.tags,
+    {
+      Name = var.cluster_name
+    }
+  )
 }
 
 resource "aws_eks_node_group" "default" {
@@ -31,9 +38,12 @@ resource "aws_eks_node_group" "default" {
     max_unavailable = 1
   }
 
-  tags = {
-    Name                                            = "${var.cluster_name}-ng"
-    "k8s.io/cluster-autoscaler/enabled"             = "true"
-    "k8s.io/cluster-autoscaler/${var.cluster_name}" = "owned"
-  }
+  tags = merge(
+    var.tags,
+    {
+      Name                                            = "${var.cluster_name}-ng"
+      "k8s.io/cluster-autoscaler/enabled"             = "true"
+      "k8s.io/cluster-autoscaler/${var.cluster_name}" = "owned"
+    }
+  )
 }

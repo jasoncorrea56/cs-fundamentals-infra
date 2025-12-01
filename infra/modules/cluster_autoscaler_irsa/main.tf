@@ -1,13 +1,9 @@
-variable "cluster_name" { type = string }
-variable "oidc_provider_arn" { type = string }
-variable "namespace" { type = string }
-variable "service_account" { type = string }
-variable "role_name" { type = string }
-
-data "aws_eks_cluster" "this" { name = var.cluster_name }
-
 locals {
   oidc = replace(data.aws_eks_cluster.this.identity[0].oidc[0].issuer, "https://", "")
+}
+
+data "aws_eks_cluster" "this" {
+  name = var.cluster_name
 }
 
 data "aws_iam_policy_document" "trust" {
@@ -55,11 +51,25 @@ data "aws_iam_policy_document" "ca" {
 resource "aws_iam_role" "this" {
   name               = var.role_name
   assume_role_policy = data.aws_iam_policy_document.trust.json
+
+  tags = merge(
+    var.tags,
+    {
+      Name = var.role_name
+    }
+  )
 }
 
 resource "aws_iam_policy" "this" {
   name   = "${var.role_name}-policy"
   policy = data.aws_iam_policy_document.ca.json
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "${var.role_name}-policy"
+    }
+  )
 }
 
 resource "aws_iam_role_policy_attachment" "attach" {

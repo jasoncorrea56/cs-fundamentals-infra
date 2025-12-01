@@ -33,6 +33,13 @@ data "aws_iam_policy_document" "trust" {
 resource "aws_iam_role" "this" {
   name               = var.role_name
   assume_role_policy = data.aws_iam_policy_document.trust.json
+
+  tags = merge(
+    var.tags,
+    {
+      Name = var.role_name
+    }
+  )
 }
 
 resource "aws_iam_policy" "dns" {
@@ -61,6 +68,13 @@ resource "aws_iam_policy" "dns" {
       }
     ]
   })
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "${var.role_name}-policy"
+    }
+  )
 }
 
 resource "aws_iam_role_policy_attachment" "attach" {

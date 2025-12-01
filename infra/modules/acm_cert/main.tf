@@ -12,6 +12,13 @@ resource "aws_acm_certificate" "this" {
   lifecycle {
     create_before_destroy = true
   }
+
+  tags = merge(
+    var.tags,
+    {
+      Name = replace(var.domain_name, "*", "wildcard")
+    }
+  )
 }
 
 # Turn ACM's set(domain_validation_options) into an indexable list
@@ -40,4 +47,3 @@ resource "aws_acm_certificate_validation" "this" {
     aws_route53_record.validation.fqdn,
   ]
 }
-

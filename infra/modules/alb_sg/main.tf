@@ -14,8 +14,11 @@ resource "aws_security_group" "this" {
     ignore_changes = [ingress]
   }
 
-  tags = {
-    Name      = "${var.name_prefix}-sg"
-    Component = "alb"
-  }
+  tags = merge(
+    var.tags,
+    {
+      Name      = "${var.name_prefix}-sg"
+      Component = "alb"
+    }
+  )
 }

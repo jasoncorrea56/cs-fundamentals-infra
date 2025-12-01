@@ -7,3 +7,9 @@ variable "kubernetes_version" {
   type    = string
   default = "1.34"
 }
+
+variable "tags" {
+  description = "Base tags to apply to resources in this module"
+  type        = map(string)
+  default     = {}
+}

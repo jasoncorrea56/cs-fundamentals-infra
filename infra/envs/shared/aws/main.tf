@@ -3,6 +3,14 @@ locals {
   app_ns       = var.app_namespace
   github_owner = var.github_owner
   github_repo  = var.github_repo
+
+  # Base tags for shared infrastructure
+  common_tags = {
+    Application = local.app_name
+    Environment = "shared"
+    Namespace   = local.app_ns
+    ManagedBy   = "terraform"
+  }
 }
 
 # ------------------------------------------------------------
@@ -13,6 +21,13 @@ resource "aws_route53_zone" "jasoncorrea" {
   name          = "jasoncorrea.dev"
   comment       = "Shared public hosted zone for jasoncorrea.dev"
   force_destroy = true
+
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "jasoncorrea.dev"
+    }
+  )
 }
 
 # ------------------------------------------------------------
@@ -54,10 +69,16 @@ data "aws_iam_policy_document" "gha_assume_role" {
   }
 }
 
-
 resource "aws_iam_role" "gha_deployer" {
   name               = "${local.app_ns}-github-deployer"
   assume_role_policy = data.aws_iam_policy_document.gha_assume_role.json
+
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${local.app_ns}-github-deployer"
+    }
+  )
 }
 
 # ------------------------------------------------------------
@@ -94,6 +115,13 @@ data "aws_iam_policy_document" "gha_permissions" {
 resource "aws_iam_policy" "gha_deployer" {
   name   = "${local.app_ns}-github-deployer-policy"
   policy = data.aws_iam_policy_document.gha_permissions.json
+
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${local.app_ns}-github-deployer-policy"
+    }
+  )
 }
 
 resource "aws_iam_role_policy_attachment" "gha_deployer_attach" {
@@ -108,6 +136,8 @@ resource "aws_iam_role_policy_attachment" "gha_deployer_attach" {
 module "ecr_csf" {
   source = "../../../modules/ecr"
   name   = local.app_name
+
+  tags = local.common_tags
 }
 
 # ------------------------------------------------------------
@@ -130,4 +160,6 @@ module "acm_csf" {
   # Shared owns the hosted zone, so we reference it directly
   hosted_zone_id = aws_route53_zone.jasoncorrea.zone_id
   region         = "us-west-2"
+
+  tags = local.common_tags
 }

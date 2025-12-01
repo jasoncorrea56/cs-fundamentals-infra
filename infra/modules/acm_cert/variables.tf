@@ -25,3 +25,9 @@ variable "enable_validation" {
   type        = bool
   default     = true
 }
+
+variable "tags" {
+  description = "Base tags to apply to resources in this module"
+  type        = map(string)
+  default     = {}
+}

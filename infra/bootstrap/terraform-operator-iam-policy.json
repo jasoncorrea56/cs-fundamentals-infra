@@ -167,7 +167,9 @@
 				"SNS:Subscribe",
 				"SNS:Unsubscribe",
 				"SNS:GetSubscriptionAttributes",
-				"secretsmanager:ListSecrets"
+				"secretsmanager:ListSecrets",
+				"route53:ChangeTagsForResource",
+				"route53:ListTagsForResource"
 			],
 			"Resource": "*"
 		},

@@ -5,10 +5,17 @@ resource "aws_secretsmanager_secret" "this" {
   lifecycle {
     prevent_destroy = false
   }
+
+  tags = merge(
+    var.tags,
+    {
+      Name = var.name
+    }
+  )
 }
 
 resource "aws_secretsmanager_secret_version" "v" {
-  secret_id     = aws_secretsmanager_secret.this.id
+  secret_id = aws_secretsmanager_secret.this.id
 
   # Store as JSON with a DB_URL field so CSI/jmesPath can target it explicitly
   secret_string = jsonencode({
