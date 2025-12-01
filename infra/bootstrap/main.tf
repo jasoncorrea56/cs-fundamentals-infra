@@ -122,6 +122,10 @@ resource "aws_dynamodb_table" "tf_locks" {
 # State Log Bucket Resources #
 ##############################
 
+# tfsec:ignore:aws-s3-enable-bucket-logging
+# Logging is enabled on the primary tfstate bucket and sent to this bucket.
+# We intentionally do NOT enable logging on the logs bucket itself to avoid
+# unnecessary log-of-logs complexity and cost.
 resource "aws_s3_bucket" "tfstate_logs" {
   bucket        = "${local.bucket_name}-logs"
   force_destroy = true
@@ -131,6 +135,25 @@ resource "aws_s3_bucket" "tfstate_logs" {
     Env     = var.env
     Owner   = var.owner
     Purpose = "terraform-state-access-logs"
+  }
+}
+
+resource "aws_s3_bucket_versioning" "tfstate_logs" {
+  bucket = aws_s3_bucket.tfstate_logs.id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "tfstate_logs_sse" {
+  bucket = aws_s3_bucket.tfstate_logs.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = aws_kms_key.tf_state.arn
+    }
   }
 }
 
