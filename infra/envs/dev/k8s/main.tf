@@ -18,7 +18,7 @@ resource "kubernetes_namespace_v1" "app" {
 module "alb_controller_chart" {
   source       = "../../../modules/alb_controller_chart"
   cluster_name = local.cluster_name
-  region       = "${local.region}"
+  region       = local.region
   vpc_id       = data.terraform_remote_state.dev_aws.outputs.vpc_id
   role_arn     = data.terraform_remote_state.dev_aws.outputs.alb_controller_role_arn
 
@@ -67,7 +67,7 @@ module "secret_sync" {
   app_sa          = local.service_account
   spc_name        = "${local.app_namespace}-db-spc"
   k8s_secret_name = "${local.app_namespace}-db"
-  region          = "${local.region}"
+  region          = local.region
 
   role_arn   = data.terraform_remote_state.dev_aws.outputs.app_secrets_role_arn
   secret_arn = data.terraform_remote_state.dev_aws.outputs.db_secret_arn
@@ -85,7 +85,7 @@ module "secret_sync" {
 module "cluster_autoscaler" {
   source       = "../../../modules/cluster_autoscaler_chart"
   cluster_name = local.cluster_name
-  region       = "${local.region}"
+  region       = local.region
   role_arn     = data.terraform_remote_state.dev_aws.outputs.cluster_autoscaler_role_arn
   # chart_version   = "9.45.0" # Optional pin
 
@@ -97,7 +97,7 @@ module "cluster_autoscaler" {
 module "cloudwatch_agent_chart" {
   source       = "../../../modules/cloudwatch_agent_chart"
   cluster_name = local.cluster_name
-  region       = "${local.region}"
+  region       = local.region
   role_arn     = data.terraform_remote_state.dev_aws.outputs.cloudwatch_agent_role_arn
 
   depends_on = [
@@ -108,7 +108,7 @@ module "cloudwatch_agent_chart" {
 module "aws_for_fluent_bit_chart" {
   source       = "../../../modules/aws_for_fluent_bit_chart"
   cluster_name = local.cluster_name
-  region       = "${local.region}"
+  region       = local.region
   role_arn     = data.terraform_remote_state.dev_aws.outputs.fluent_bit_role_arn
 
   depends_on = [
@@ -123,7 +123,7 @@ module "security_policies" {
   app_port        = 8080
   ingress_cidrs   = [data.terraform_remote_state.dev_aws.outputs.vpc_cidr_block]
 
-  # Dev: namespace is app/CI-managed
+  # Namespace is app/CI-managed
   manage_namespace = false
 
   app_selector = {

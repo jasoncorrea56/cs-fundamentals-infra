@@ -10,7 +10,7 @@ data "aws_iam_policy_document" "terraform_operator_assume" {
     effect = "Allow"
 
     principals {
-      type        = "AWS"
+      type = "AWS"
       identifiers = [
         "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root",
         "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/tf-bootstrap",

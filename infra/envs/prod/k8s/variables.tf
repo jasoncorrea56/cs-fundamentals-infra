@@ -152,6 +152,6 @@ variable "app_chart_enable" {
 
 variable "image_tag" {
   type        = string
-  description = "Container image tag to deploy in dev (i.e. 0.7.5-<sha7>)."
-  default     = "0.7.5-2c5e092"
+  description = "Container image tag to deploy in dev (i.e. 0.7.6-<sha7>)."
+  default     = "0.7.6-a71e692"
 }

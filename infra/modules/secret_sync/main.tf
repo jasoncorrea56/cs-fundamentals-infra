@@ -24,38 +24,38 @@ resource "kubernetes_manifest" "spc" {
       name      = var.spc_name
       namespace = var.namespace
     }
-      spec = {
-    provider = "aws"
+    spec = {
+      provider = "aws"
 
-    # Tell the AWS provider which Secrets Manager object to read
-    # AND which JSON key to extract as an alias.
-    parameters = {
-      objects = <<-EOT
+      # Tell the AWS provider which Secrets Manager object to read
+      # AND which JSON key to extract as an alias.
+      parameters = {
+        objects = <<-EOT
         - objectName: "${local.csi_object_name}"
           objectType: "secretsmanager"
           jmesPath:
             - path: "DB_URL"
               objectAlias: "DB_URL"
       EOT
-    }
-
-    # Enable "secret sync":
-    # - Create/update a Kubernetes Secret named var.k8s_secret_name
-    # - Populate key DB_URL from the ASM JSON field DB_URL
-    secretObjects = [
-      {
-        secretName = var.k8s_secret_name
-        type       = "Opaque"
-        data = [
-          {
-            # MUST match the objectAlias above, not the ARN
-            objectName = "DB_URL"
-            key        = "DB_URL"
-          }
-        ]
       }
-    ]
-  }
+
+      # Enable "secret sync":
+      # - Create/update a Kubernetes Secret named var.k8s_secret_name
+      # - Populate key DB_URL from the ASM JSON field DB_URL
+      secretObjects = [
+        {
+          secretName = var.k8s_secret_name
+          type       = "Opaque"
+          data = [
+            {
+              # MUST match the objectAlias above, not the ARN
+              objectName = "DB_URL"
+              key        = "DB_URL"
+            }
+          ]
+        }
+      ]
+    }
   }
   depends_on = [kubernetes_service_account.app]
 }

@@ -221,7 +221,7 @@
 				"secretsmanager:GetResourcePolicy",
 				"secretsmanager:TagResource"
 			],
-			"Resource": "arn:aws:secretsmanager:us-west-2:948319129176:secret:csf/db-url-*"
+			"Resource": "arn:aws:secretsmanager:us-west-2:948319129176:secret:csf/*/db-url-*"
 		},
 		{
 			"Effect": "Allow",

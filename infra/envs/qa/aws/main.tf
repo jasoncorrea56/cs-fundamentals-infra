@@ -3,7 +3,6 @@ locals {
   environment = var.environment
   region      = var.region
 
-
   # App and k8s config
   app_name = var.app_name
   app_ns   = var.app_namespace
@@ -13,11 +12,11 @@ locals {
   cluster_name = coalesce(var.cluster_name, "${var.app_namespace}-${var.environment}-cluster")
 
   # Optional DNS convenience (currently not wired into modules here,
-  # but aligned with dev/aws for future use).
+  # but aligned with qa/aws for future use).
   subdomain_prefix = "${local.app_ns}-${local.environment}"
   app_domain       = "${local.subdomain_prefix}.${data.terraform_remote_state.shared.outputs.shared_zone_name}"
 
-  # Base tags for all prod resources
+  # Base tags for all QA resources
   common_tags = {
     Application = local.app_name
     Environment = local.environment
@@ -118,7 +117,7 @@ module "externaldns_irsa" {
 module "db_secret" {
   source = "../../../modules/asm_secret"
 
-  # Per-env secret name (i.e. csf/prod/db-url)
+  # Per-env secret name (i.e. csf/qa/db-url)
   name   = "${local.app_ns}/${local.environment}/db-url"
   db_url = var.db_url
 

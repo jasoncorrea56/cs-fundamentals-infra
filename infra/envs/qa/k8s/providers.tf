@@ -23,12 +23,12 @@ provider "aws" {
   region = var.region
 }
 
-# Read cluster info from the dev/aws stack
-data "terraform_remote_state" "dev_aws" {
+# Read cluster info from the qa/aws stack
+data "terraform_remote_state" "qa_aws" {
   backend = "s3"
   config = {
     bucket       = "jasoncorrea56-cs-fundamentals-tfstate-prod-${var.region}"
-    key          = "envs/dev/aws/terraform.tfstate"
+    key          = "envs/qa/aws/terraform.tfstate"
     region       = "${var.region}"
     use_lockfile = true
   }
@@ -47,13 +47,13 @@ data "terraform_remote_state" "shared" {
   }
 }
 
-# Derive EKS endpoint + CA from AWS directly, using the cluster_name from dev/aws outputs
+# Derive EKS endpoint + CA from AWS directly, using the cluster_name from qa/aws outputs
 data "aws_eks_cluster" "app" {
-  name = data.terraform_remote_state.dev_aws.outputs.cluster_name
+  name = data.terraform_remote_state.qa_aws.outputs.cluster_name
 }
 
 data "aws_eks_cluster_auth" "app" {
-  name = data.terraform_remote_state.dev_aws.outputs.cluster_name
+  name = data.terraform_remote_state.qa_aws.outputs.cluster_name
 }
 
 provider "kubernetes" {

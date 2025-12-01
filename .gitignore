@@ -45,3 +45,5 @@ terraform.rc
 # Zipfiles
 *.zip
 
+# macOS
+.DS_Store
