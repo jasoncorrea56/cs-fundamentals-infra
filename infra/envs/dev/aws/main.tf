@@ -1,7 +1,7 @@
 locals {
   # Logical environment name (dev, qa, prod, etc.)
   environment = var.environment
-  region = var.region
+  region      = var.region
 
   # App and k8s config
   app_name = var.app_name
@@ -16,7 +16,7 @@ locals {
   subdomain_prefix = "${local.app_ns}-${local.environment}"
   app_domain       = "${local.subdomain_prefix}.${data.terraform_remote_state.shared.outputs.shared_zone_name}"
 
-  # Base tags for all dev resources
+  # Base tags for all Dev resources
   common_tags = {
     Application = local.app_name
     Environment = local.environment
@@ -30,11 +30,11 @@ module "vpc" {
   name         = local.app_ns
   cidr_block   = "10.0.0.0/16"
   cluster_name = local.cluster_name
-  azs          = [
-    "${local.region}a", 
+  azs = [
+    "${local.region}a",
     "${local.region}b"
   ]
-  environment  = local.environment
+  environment = local.environment
 
   tags = local.common_tags
 }

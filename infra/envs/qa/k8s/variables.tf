@@ -1,7 +1,7 @@
 variable "environment" {
   description = "Environment name (i.e., dev, prod, qa)"
   type        = string
-  default     = "dev"
+  default     = "qa"
 }
 
 variable "region" {
@@ -21,7 +21,7 @@ variable "app_namespace" {
 }
 
 variable "app_domain" {
-  description = "FQDN for the app (i.e. csf-dev.jasoncorrea.dev)"
+  description = "FQDN for the app (i.e. csf-qa.jasoncorrea.dev)"
   type        = string
 }
 
@@ -67,13 +67,13 @@ variable "cluster_name" {
 variable "eks_cluster_role_name" {
   description = "IAM role name for the EKS control plane"
   type        = string
-  default     = "csf-dev-eks-cluster-role"
+  default     = "csf-qa-eks-cluster-role"
 }
 
 variable "eks_node_role_name" {
   description = "IAM role name for the EKS node group"
   type        = string
-  default     = "csf-dev-eks-node-role"
+  default     = "csf-qa-eks-node-role"
 }
 
 variable "kubernetes_version" {
@@ -152,6 +152,6 @@ variable "app_chart_enable" {
 
 variable "image_tag" {
   type        = string
-  description = "Container image tag to deploy in Dev (i.e. 0.7.6-<sha7>)."
+  description = "Container image tag to deploy in QA (i.e. 0.7.6-<sha7>)."
   default     = "0.7.6-a71e692"
 }

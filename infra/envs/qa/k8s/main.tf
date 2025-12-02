@@ -19,11 +19,11 @@ module "alb_controller_chart" {
   source       = "../../../modules/alb_controller_chart"
   cluster_name = local.cluster_name
   region       = local.region
-  vpc_id       = data.terraform_remote_state.prod_aws.outputs.vpc_id
-  role_arn     = data.terraform_remote_state.prod_aws.outputs.alb_controller_role_arn
+  vpc_id       = data.terraform_remote_state.qa_aws.outputs.vpc_id
+  role_arn     = data.terraform_remote_state.qa_aws.outputs.alb_controller_role_arn
 
   depends_on = [
-    data.terraform_remote_state.prod_aws,
+    data.terraform_remote_state.qa_aws,
   ]
 }
 
@@ -32,7 +32,7 @@ module "externaldns_chart" {
   cluster_name = local.cluster_name
   namespace    = "kube-system"
   sa_name      = "external-dns"
-  role_arn     = data.terraform_remote_state.prod_aws.outputs.externaldns_role_arn
+  role_arn     = data.terraform_remote_state.qa_aws.outputs.externaldns_role_arn
 
   # Use the shared hosted zone (managed by envs/shared).
   owner_id        = local.cluster_name
@@ -40,7 +40,7 @@ module "externaldns_chart" {
   zone_id_filters = [data.terraform_remote_state.shared.outputs.shared_zone_id]
 
   depends_on = [
-    data.terraform_remote_state.prod_aws,
+    data.terraform_remote_state.qa_aws,
     data.terraform_remote_state.shared,
   ]
 }
@@ -49,7 +49,7 @@ module "csi_driver" {
   source = "../../../modules/csi_driver_chart"
 
   depends_on = [
-    data.terraform_remote_state.prod_aws,
+    data.terraform_remote_state.qa_aws,
   ]
 }
 
@@ -69,8 +69,8 @@ module "secret_sync" {
   k8s_secret_name = "${local.app_namespace}-db"
   region          = local.region
 
-  role_arn   = data.terraform_remote_state.prod_aws.outputs.app_secrets_role_arn
-  secret_arn = data.terraform_remote_state.prod_aws.outputs.db_secret_arn
+  role_arn   = data.terraform_remote_state.qa_aws.outputs.app_secrets_role_arn
+  secret_arn = data.terraform_remote_state.qa_aws.outputs.db_secret_arn
 
   enable = var.secret_sync_enable
 
@@ -78,7 +78,7 @@ module "secret_sync" {
     module.csi_aws_provider,
     module.csi_driver,
     module.security_policies,
-    data.terraform_remote_state.prod_aws,
+    data.terraform_remote_state.qa_aws,
   ]
 }
 
@@ -86,11 +86,11 @@ module "cluster_autoscaler" {
   source       = "../../../modules/cluster_autoscaler_chart"
   cluster_name = local.cluster_name
   region       = local.region
-  role_arn     = data.terraform_remote_state.prod_aws.outputs.cluster_autoscaler_role_arn
+  role_arn     = data.terraform_remote_state.qa_aws.outputs.cluster_autoscaler_role_arn
   # chart_version   = "9.45.0" # Optional pin
 
   depends_on = [
-    data.terraform_remote_state.prod_aws,
+    data.terraform_remote_state.qa_aws,
   ]
 }
 
@@ -98,10 +98,10 @@ module "cloudwatch_agent_chart" {
   source       = "../../../modules/cloudwatch_agent_chart"
   cluster_name = local.cluster_name
   region       = local.region
-  role_arn     = data.terraform_remote_state.prod_aws.outputs.cloudwatch_agent_role_arn
+  role_arn     = data.terraform_remote_state.qa_aws.outputs.cloudwatch_agent_role_arn
 
   depends_on = [
-    data.terraform_remote_state.prod_aws,
+    data.terraform_remote_state.qa_aws,
   ]
 }
 
@@ -109,10 +109,10 @@ module "aws_for_fluent_bit_chart" {
   source       = "../../../modules/aws_for_fluent_bit_chart"
   cluster_name = local.cluster_name
   region       = local.region
-  role_arn     = data.terraform_remote_state.prod_aws.outputs.fluent_bit_role_arn
+  role_arn     = data.terraform_remote_state.qa_aws.outputs.fluent_bit_role_arn
 
   depends_on = [
-    data.terraform_remote_state.prod_aws,
+    data.terraform_remote_state.qa_aws,
   ]
 }
 
@@ -121,9 +121,9 @@ module "security_policies" {
   namespace       = local.app_namespace
   service_account = local.service_account
   app_port        = 8080
-  ingress_cidrs   = [data.terraform_remote_state.prod_aws.outputs.vpc_cidr_block]
+  ingress_cidrs   = [data.terraform_remote_state.qa_aws.outputs.vpc_cidr_block]
 
-  # Prod: namespace is app/CI-managed
+  # Namespace is app/CI-managed
   manage_namespace = false
 
   app_selector = {
@@ -133,7 +133,7 @@ module "security_policies" {
 
   allow_db_egress = {
     enabled = true
-    cidrs   = [data.terraform_remote_state.prod_aws.outputs.vpc_cidr_block]
+    cidrs   = [data.terraform_remote_state.qa_aws.outputs.vpc_cidr_block]
     ports   = [5432]
   }
 
@@ -160,13 +160,14 @@ module "app_chart" {
   enable     = var.app_chart_enable
   chart_path = abspath("${path.module}/../../../../../${local.app_name}/helm")
 
-  # Prod uses the prod values file (public ingress/TLS)
-  values_file = abspath("${path.module}/../../../../../${local.app_name}/helm/values-prod.yaml")
+  # QA uses the qa values file (allowlist ingress/TLS)
+  values_file = abspath("${path.module}/../../../../../${local.app_name}/helm/values-qa.yaml")
 
   acm_certificate_arn = data.terraform_remote_state.shared.outputs.acm_csf_arn
   namespace           = local.app_namespace
   release_name        = local.app_namespace
 
+  # QA ingress host (i.e. csf-qa.jasoncorrea.dev)
   ingress_hosts = [
     var.app_domain,
   ]

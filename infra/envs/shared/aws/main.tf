@@ -160,7 +160,7 @@ module "acm_csf" {
 
   # Shared owns the hosted zone, so we reference it directly
   hosted_zone_id = aws_route53_zone.jasoncorrea.zone_id
-  region         = "${local.region}"
+  region         = local.region
 
   tags = local.common_tags
 }

@@ -3,6 +3,23 @@ locals {
   bucket_name = "${var.org}-${var.project}-tfstate-${var.env}-${var.region}"
 }
 
+resource "aws_kms_key" "tf_state" {
+  description             = "KMS key for Terraform state and lock table"
+  deletion_window_in_days = 7
+  enable_key_rotation     = true
+
+  tags = {
+    Project = var.project
+    Env     = var.env
+    Owner   = var.owner
+    Purpose = "terraform-state-kms"
+  }
+}
+
+##########################
+# State Bucket Resources #
+##########################
+
 resource "aws_s3_bucket" "tfstate" {
   bucket        = local.bucket_name
   force_destroy = true
@@ -23,12 +40,14 @@ resource "aws_s3_bucket_versioning" "versioning" {
   }
 }
 
-# Server-side encryption (AES256)
+# Server-side encryption (KMS)
 resource "aws_s3_bucket_server_side_encryption_configuration" "sse" {
   bucket = aws_s3_bucket.tfstate.id
+
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = aws_kms_key.tf_state.arn
     }
   }
 }
@@ -80,10 +99,94 @@ resource "aws_dynamodb_table" "tf_locks" {
     type = "S"
   }
 
+  # Encryption at rest using customer-managed KMS key
+  server_side_encryption {
+    enabled     = true
+    kms_key_arn = aws_kms_key.tf_state.arn
+  }
+
+  # Point-in-time recovery for accidental/malicious changes
+  point_in_time_recovery {
+    enabled = true
+  }
+
   tags = {
     Project = var.project
     Env     = var.env
     Owner   = var.owner
-    Purpose = "terraform-locks"
+    Purpose = "terraform-state-locks"
+  }
+}
+
+##############################
+# State Log Bucket Resources #
+##############################
+
+#tfsec:ignore:aws-s3-enable-bucket-logging
+resource "aws_s3_bucket" "tfstate_logs" {
+  bucket        = "${local.bucket_name}-logs"
+  force_destroy = true
+
+  # Logging is enabled on the primary tfstate bucket and sent to this bucket.
+  # We intentionally do NOT enable logging on the logs bucket itself to avoid
+  # unnecessary log-of-logs complexity and cost.
+
+  tags = {
+    Project = var.project
+    Env     = var.env
+    Owner   = var.owner
+    Purpose = "terraform-state-access-logs"
+  }
+}
+
+resource "aws_s3_bucket_versioning" "tfstate_logs" {
+  bucket = aws_s3_bucket.tfstate_logs.id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "tfstate_logs_sse" {
+  bucket = aws_s3_bucket.tfstate_logs.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = aws_kms_key.tf_state.arn
+    }
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "tfstate_logs" {
+  bucket                  = aws_s3_bucket.tfstate_logs.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+# Ship state bucket access logs to the logging bucket
+resource "aws_s3_bucket_logging" "tfstate" {
+  bucket = aws_s3_bucket.tfstate.id
+
+  target_bucket = aws_s3_bucket.tfstate_logs.id
+  target_prefix = "s3-access-logs/"
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "tfstate_logs" {
+  bucket = aws_s3_bucket.tfstate_logs.id
+
+  rule {
+    id     = "expire-access-logs"
+    status = "Enabled"
+
+    filter {
+      prefix = "" # Apply to all objects
+    }
+
+    expiration {
+      days = 90
+    }
   }
 }

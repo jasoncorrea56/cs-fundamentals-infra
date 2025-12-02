@@ -20,7 +20,7 @@ terraform {
 }
 
 provider "aws" {
-  region = "${var.region}"
+  region = var.region
 }
 
 # Read cluster info from the prod/aws stack

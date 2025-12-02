@@ -18,6 +18,7 @@
 				"s3:GetLifecycleConfiguration",
 				"s3:GetReplicationConfiguration",
 				"s3:DeleteBucketPolicy",
+				"s3:PutLifecycleConfiguration",
 				"dynamodb:CreateTable",
 				"dynamodb:UpdateTable",
 				"dynamodb:DeleteTable",
@@ -28,6 +29,7 @@
 				"dynamodb:UpdateItem",
 				"dynamodb:TagResource",
 				"dynamodb:ListTagsOfResource",
+				"dynamodb:UpdateContinuousBackups",
 				"ecr:CreateRepository",
 				"ecr:DescribeRepositories",
 				"ecr:DeleteLifecyclePolicy",
@@ -85,6 +87,7 @@
 				"route53:ListHostedZones",
 				"route53:ListHostedZonesByName",
 				"route53:ChangeResourceRecordSets",
+				"route53:ChangeTagsForResource",
 				"route53:ListResourceRecordSets",
 				"route53:GetChange",
 				"route53:GetDNSSEC",
@@ -159,6 +162,15 @@
 				"cloudwatch:PutMetricAlarm",
 				"cloudwatch:DeleteAlarms",
 				"cloudwatch:TagResource",
+				"kms:CreateGrant",
+				"kms:CreateKey",
+				"kms:DescribeKey",
+				"kms:EnableKeyRotation",
+				"kms:GetKeyPolicy",
+				"kms:GetKeyRotationStatus",
+				"kms:ListResourceTags",
+				"kms:ScheduleKeyDeletion",
+				"kms:TagResource",
 				"SNS:CreateTopic",
 				"SNS:SetTopicAttributes",
 				"SNS:GetTopicAttributes",
@@ -167,9 +179,7 @@
 				"SNS:Subscribe",
 				"SNS:Unsubscribe",
 				"SNS:GetSubscriptionAttributes",
-				"secretsmanager:ListSecrets",
-				"route53:ChangeTagsForResource",
-				"route53:ListTagsForResource"
+				"secretsmanager:ListSecrets"
 			],
 			"Resource": "*"
 		},
@@ -221,7 +231,7 @@
 				"secretsmanager:GetResourcePolicy",
 				"secretsmanager:TagResource"
 			],
-			"Resource": "arn:aws:secretsmanager:us-west-2:948319129176:secret:csf/db-url-*"
+			"Resource": "arn:aws:secretsmanager:us-west-2:948319129176:secret:csf/*/db-url-*"
 		},
 		{
 			"Effect": "Allow",
@@ -241,16 +251,6 @@
 				"logs:ListTagsForResource"
 			],
 			"Resource": "arn:aws:logs:us-west-2:948319129176:log-group:/aws/containerinsights/*"
-		},
-		{
-			"Effect": "Allow",
-			"Action": [
-				"iam:GetRolePolicy"
-			],
-			"Resource": [
-				"arn:aws:iam::948319129176:role/csf-cloudwatch-agent-role",
-				"arn:aws:iam::948319129176:role/csf-fluent-bit-role"
-			]
 		},
 		{
 			"Effect": "Allow",

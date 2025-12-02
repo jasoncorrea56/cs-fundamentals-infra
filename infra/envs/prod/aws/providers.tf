@@ -17,7 +17,7 @@ terraform {
 }
 
 provider "aws" {
-  region = "${var.region}"
+  region = var.region
 }
 
 data "terraform_remote_state" "shared" {
