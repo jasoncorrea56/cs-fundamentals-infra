@@ -57,8 +57,8 @@ variable "kubernetes_version" {
 
 variable "alb_name" {
   description = "Optional ALB name (i.e. k8s-...elb.amazonaws.com) used to gate runtime alerts lookup."
-  type    = string
-  default = ""
+  type        = string
+  default     = ""
 }
 
 variable "alb_dns_name" {
