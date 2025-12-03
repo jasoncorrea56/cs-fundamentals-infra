@@ -25,7 +25,7 @@ data "terraform_remote_state" "shared" {
 
   # Config from infra/envs/shared/aws/backend.hcl
   config = {
-    bucket       = "jasoncorrea56-cs-fundamentals-tfstate-prod-${var.region}"
+    bucket       = "jasoncorrea56-cs-fundamentals-tfstate-bootstrap-${var.region}"
     key          = "envs/shared/aws/terraform.tfstate"
     region       = "${var.region}"
     use_lockfile = true

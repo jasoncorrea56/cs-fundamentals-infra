@@ -167,7 +167,6 @@ module "app_chart" {
   namespace           = local.app_namespace
   release_name        = local.app_namespace
 
-  # Dev ingress host (i.e. csf-dev.jasoncorrea.dev)
   ingress_hosts = [
     var.app_domain,
   ]

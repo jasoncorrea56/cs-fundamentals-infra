@@ -1,0 +1,19 @@
+# ------------------------------------------------------------
+# Sample tfvars for shared/aws layer
+# Copy to terraform.tfvars and customize for your environment.
+# ------------------------------------------------------------
+
+# Core identifiers used across all environments
+app_name      = "cs-fundamentals"   # Logical app name (used for tagging/naming)
+app_namespace = "csf"               # Namespace prefix for env resources
+
+# GitHub repo metadata for CI/CD IAM integration
+github_repo  = "cs-fundamentals"
+github_owner = "your-github-username"
+
+# AWS region to deploy shared resources
+region = "us-west-2"
+
+# ACM certificate DNS validation toggle. Initially set to false.
+# If true: creates DNS validation records in the shared hosted zone.
+enable_acm_validation = false

@@ -123,7 +123,7 @@ module "security_policies" {
   app_port        = 8080
   ingress_cidrs   = [data.terraform_remote_state.prod_aws.outputs.vpc_cidr_block]
 
-  # Prod: namespace is app/CI-managed
+  # Namespace is app/CI-managed
   manage_namespace = false
 
   app_selector = {
