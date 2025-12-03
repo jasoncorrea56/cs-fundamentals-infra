@@ -3,7 +3,6 @@ locals {
   environment = var.environment
   region      = var.region
 
-
   # App and k8s config
   app_name = var.app_name
   app_ns   = var.app_namespace

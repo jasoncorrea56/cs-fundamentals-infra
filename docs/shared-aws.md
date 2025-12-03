@@ -48,6 +48,14 @@ Apply complete! Resources: 9 added, 0 changed, 0 destroyed.
 Use the `shared_zone_name_servers` output to update your DNS registrar.
 **Wait ~5 minutes before continuing.**
 
+Confirm DNS name server update propagation:
+
+```bash
+dig NS jasoncorrea.dev +short
+dig @8.8.8.8 NS jasoncorrea.dev +short
+dig @1.1.1.1 NS jasoncorrea.dev +short
+```
+
 ---
 
 ## Phase 2 — Validate ACM certificate

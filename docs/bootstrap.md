@@ -33,7 +33,7 @@ cd infra/bootstrap
 terraform plan
 terraform apply
 
-Apply complete! Resources: 9 added, 0 changed, 0 destroyed.
+Apply complete! Resources: 16 added, 0 changed, 0 destroyed.
 ```
 
 **Outputs:**

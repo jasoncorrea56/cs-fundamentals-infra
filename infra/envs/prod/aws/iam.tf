@@ -1,8 +1,3 @@
-locals {
-  github_owner = var.github_owner
-  github_repo  = var.github_repo
-}
-
 # Shared GitHub Actions deploy role (created in shared env).
 # Env only reads it and exposes the ARN via outputs.
 data "aws_iam_role" "gha_deployer" {

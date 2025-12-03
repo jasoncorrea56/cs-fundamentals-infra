@@ -1,5 +1,5 @@
 locals {
-  # Example: jasoncorrea56-cs-fundamentals-tfstate-prod-us-west-2
+  # Example: jasoncorrea56-cs-fundamentals-tfstate-bootstrap-us-west-2
   bucket_name = "${var.org}-${var.project}-tfstate-${var.env}-${var.region}"
 }
 

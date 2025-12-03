@@ -12,8 +12,8 @@ variable "project" {
 
 variable "env" {
   type        = string
-  default     = "prod"
-  description = "Environment identifier for bootstrap resources (i.e. 'prod')"
+  default     = "bootstrap"
+  description = "Environment identifier for bootstrap resources (i.e. 'bootstrap')"
 }
 
 variable "region" {

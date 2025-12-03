@@ -1,0 +1,50 @@
+# ------------------------------------------------------------
+# Sample tfvars for Prod k8s layer
+# Copy to terraform.tfvars and tweak values for your account.
+# ------------------------------------------------------------
+
+# Logical environment + region
+environment = "prod"
+region      = "us-west-2"
+
+# Core app wiring
+app_name      = "cs-fundamentals"
+app_namespace = "csf"
+
+# Kubernetes service account that the app runs under
+service_account = "csf-app"
+
+# App FQDN (must match Helm ingress host in values-prod.yaml)
+# i.e. if your shared zone is "example.com"
+app_domain = "csf.example.com"
+
+# Image to deploy to Prod (built by CI).
+# Replace with a real tag like: 0.7.7-b671366
+image_tag = "0.0.0-local"
+
+# Console IAM mapping into system:masters (via aws-auth)
+# Uncomment and replace with your own ARNs.
+console_admin_user_arns = [
+  # "arn:aws:iam::123456789012:user/YourAdminUser",
+]
+
+# Example if you later want to add SSO/role-based admins:
+console_admin_role_arns = [
+#   "arn:aws:iam::123456789012:role/YourAdminRole",
+]
+
+# Secret sync:
+# - For a totally clean cluster, start false, bootstrap, then flip to true.
+# - For existing env where SecretProviderClass already exists, you can set true.
+# Typical sequence:
+#   Apply #1: false  (install CSI + SPC wiring only)
+#   Apply #2: true   (enable sync once ASM + CSI are ready)
+secret_sync_enable = false
+
+# App Chart:
+# - Start false, let infra + CSI come up before the app.
+# Typical sequence:
+#   Apply #1: false  (no app yet)
+#   Apply #2: false  (still staging infra/secret sync)
+#   Apply #3: true   (deploy app)
+app_chart_enable = false
